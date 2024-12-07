@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import Transition from "../utils/Transition";
+import Transition from "../../utils/Transition";
 
 function DropdownFilter({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -7,7 +7,7 @@ function DropdownFilter({ align }) {
   const trigger = useRef(null);
   const dropdown = useRef(null);
 
-  //Clear  filtres on click clear button 
+  //Clear  filtres on click clear button
 
   const Checkrefs = {
     DirectorIndirect: useRef(null),

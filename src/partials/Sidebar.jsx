@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import SidebarLinkGroup from "./SidebarLinkGroup";
-import { CiLogout } from "react-icons/ci";
 import {
   FaBox,
   FaEnvelope,
@@ -225,7 +224,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
                 }}
               </SidebarLinkGroup>
               {/* Products */}
-              <SidebarLinkGroup activecondition={pathname.includes("products")}>
+              <SidebarLinkGroup activecondition={pathname.includes("product")}>
                 {(handleClick, open) => {
                   return (
                     <React.Fragment>
@@ -246,7 +245,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
                           <div className="flex items-center">
                             <FaBox
                               className={`shrink-0 fill-current text-lg ${
-                                pathname.includes("products")
+                                pathname.includes("product")
                                   ? "text-violet-500"
                                   : "text-gray-400 dark:text-gray-500"
                               }`}
@@ -273,7 +272,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
-                              to="/products"
+                              to="/product/all"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
                                 (isActive
@@ -289,7 +288,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
-                              to="/products/add"
+                              to="/product/add"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
                                 (isActive
