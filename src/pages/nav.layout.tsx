@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Sidebar from "../partials/Sidebar";
-import Header from "../partials/Header";
+import Sidebar from "@partials/Sidebar";
+import Header from "@partials/Header";
 import { Outlet } from "react-router-dom";
 
 function NavLayout() {
