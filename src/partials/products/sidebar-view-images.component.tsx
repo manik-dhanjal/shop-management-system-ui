@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, RefObject } from "react";
 import Slider from "react-slick";
 import { Image } from "@/shared/interfaces/image.interface";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { IoClose } from "react-icons/io5";
-import Button from "@/shared/components/button.component";
-import ImageUploadWithAltText from "./image-upload.component";
+import { IoClose, IoTrash } from "react-icons/io5";
 
 // Modal Component
 const Modal = ({
@@ -38,12 +36,18 @@ const Modal = ({
 
 export interface ProductImagesTypes {
   images: Image[];
+  onDelete?: (imageIndex: number) => void;
   className?: string; // Made className optional in case it's not passed
 }
 
-const ProductImages = ({ images, className }: ProductImagesTypes) => {
-  const [nav1, setNav1] = useState<Slider>();
-  const [nav2, setNav2] = useState<Slider>();
+const SidebarViewImages = ({
+  images,
+  className,
+  onDelete,
+}: ProductImagesTypes) => {
+  console.log(images);
+  const [nav1, setNav1] = useState<RefObject<null>>();
+  const [nav2, setNav2] = useState<RefObject<null>>();
   const [modalOpen, setModalOpen] = useState(false); // Modal state
   const [modalImage, setModalImage] = useState<{
     src: string;
@@ -51,22 +55,13 @@ const ProductImages = ({ images, className }: ProductImagesTypes) => {
   } | null>(null); // Modal image state
 
   // Define refs properly with the correct type.
-  const sliderRef1 = useRef<Slider>(null);
-  const sliderRef2 = useRef<Slider>(null);
+  let sliderRef1 = useRef(null);
+  let sliderRef2 = useRef(null);
 
   useEffect(() => {
-    if (sliderRef1.current && sliderRef2.current) {
-      setNav1(sliderRef1.current);
-      setNav2(sliderRef2.current);
-    }
-  }, [sliderRef1, sliderRef2]);
-
-  if (images.length === 0)
-    return (
-      <div>
-        <ImageUploadWithAltText />
-      </div>
-    );
+    setNav1(sliderRef1);
+    setNav2(sliderRef2);
+  }, []);
 
   const openModal = (imageSrc: string, imageAlt: string) => {
     setModalImage({ src: imageSrc, alt: imageAlt });
@@ -77,26 +72,26 @@ const ProductImages = ({ images, className }: ProductImagesTypes) => {
     setModalOpen(false);
     setModalImage(null);
   };
+  const sliderSettings1 = {};
 
-  const sliderSettings = {
-    slidesToShow: 4,
+  const sliderSettings2 = {
+    slidesToShow: 3,
     swipeToSlide: true,
-    focusOnSelect: images.length > 4,
-    arrows: images.length >= 5, // Only show arrows if there are 4 or more images
+    focusOnSelect: true,
+    // arrows: images.length >= 5, // Only show arrows if there are 4 or more images
+    arrows: false,
     infinite: false,
   };
 
   return (
     <div className={`slider-container ${className}`}>
-      <h2 className="text-xl text-gray-600 mb-4">Featured Images</h2>
       {/* Main Image Slider */}
       <Slider
-        asNavFor={nav2}
-        ref={sliderRef1}
-        slidesToShow={1}
-        slidesToScroll={1}
+        asNavFor={nav2 as never}
+        ref={(slider) => (sliderRef1 = slider as never)}
         fade={true}
         className="mb-1"
+        {...sliderSettings1}
       >
         {images.map((image, index) => (
           <div
@@ -105,7 +100,15 @@ const ProductImages = ({ images, className }: ProductImagesTypes) => {
             onClick={() => openModal(image.src, image.alt)}
           >
             {/* Image container with fixed height and centered image */}
-            <div className="flex justify-center items-center h-56 cursor-pointer bg-slate-100 rounded-lg overflow-hidden">
+            <div className="flex justify-center items-center h-60 cursor-pointer bg-slate-100 dark:bg-gray-800 rounded-lg overflow-hidden relative">
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(index)}
+                  className="absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 rounded-full w-8 h-8 flex justify-center items-center z-100"
+                >
+                  <IoTrash className="text-xl" />
+                </button>
+              )}
               <img
                 src={image.src}
                 alt={image.alt}
@@ -115,29 +118,26 @@ const ProductImages = ({ images, className }: ProductImagesTypes) => {
           </div>
         ))}
       </Slider>
-
       {/* Thumbnail Navigation Slider */}
       <Slider
-        asNavFor={nav1}
-        ref={sliderRef2}
-        {...sliderSettings}
+        asNavFor={nav1 as never}
+        ref={(slider) => (sliderRef2 = slider as never)}
+        {...sliderSettings2}
         className="thumbnail-slider"
       >
         {images.map((image, index) => (
           <div
             key={image.alt + index}
-            className="p-1 cursor-pointer hover:scale-105 transition-transform duration-300"
+            className="p-1 cursor-pointer hover:scale-105 transition-transform duration-300 outline-none"
           >
             <img
               src={image.src}
               alt={image.alt}
-              className="w-full h-16 object-cover rounded-lg shadow-md"
+              className="w-full h-16 object-cover rounded-lg shadow-md outline-none"
             />
           </div>
         ))}
       </Slider>
-
-      <Button className="w-full mt-2">Upload Image</Button>
       {/* Modal for showing image in large view */}
       {modalOpen && modalImage && (
         <Modal
@@ -150,4 +150,4 @@ const ProductImages = ({ images, className }: ProductImagesTypes) => {
   );
 };
 
-export default ProductImages;
+export default SidebarViewImages;

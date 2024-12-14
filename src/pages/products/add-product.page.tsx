@@ -6,7 +6,8 @@ import TextArea from "@components/text-area.component";
 import KeywordInput from "@components/keyword-input.component";
 import TableInput from "@components/table-input.component";
 import Button from "@components/button.component";
-import ProductImages from "@partials/products/product-images.component";
+import ProductFeaturedImages from "@partials/products/product-featured-images.component";
+import { Image } from "@shared/interfaces/image.interface";
 const INITIAL_PRODUCT_FORM: AddProductType = {
   name: "",
   description: "",
@@ -20,6 +21,33 @@ const INITIAL_PRODUCT_FORM: AddProductType = {
   cgstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
   sgstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
 };
+
+const ig = [
+  {
+    src: "https://plus.unsplash.com/premium_photo-1670148434900-5f0af77ba500?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3BsYXNofGVufDB8fDB8fHww",
+    alt: "cd",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1507072757289-c7de1a8c075e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c3BsYXNofGVufDB8fDB8fHww",
+    alt: "cd",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1506875644286-0fa3dc4df91f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHNwbGFzaHxlbnwwfHwwfHx8MA%3D%3D",
+    alt: "cd",
+  },
+  {
+    src: "https://plus.unsplash.com/premium_photo-1670148434900-5f0af77ba500?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3BsYXNofGVufDB8fDB8fHww",
+    alt: "cd",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1507072757289-c7de1a8c075e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c3BsYXNofGVufDB8fDB8fHww",
+    alt: "cd",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1506875644286-0fa3dc4df91f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHNwbGFzaHxlbnwwfHwwfHx8MA%3D%3D",
+    alt: "cd",
+  },
+];
 
 const AddProduct = () => {
   const [productForm, setProductForm] =
@@ -56,6 +84,12 @@ const AddProduct = () => {
     setProductForm({
       ...productForm,
       [name]: value,
+    });
+  };
+  const handleImageChange = (images: Image[]) => {
+    setProductForm({
+      ...productForm,
+      images,
     });
   };
   return (
@@ -121,35 +155,36 @@ const AddProduct = () => {
           />
         </form>
       </div>
-      <div className="bg-slate-300 w-[1px]" />
+      <div className="bg-slate-300 w-[1px] dark:bg-gray-800" />
       <div className="w-[330px]">
         <div>
-          <h2 className="text-xl text-gray-600 mb-3">Publish Product</h2>
+          <div className="flex w-full gap-5 mb-5">
+            <Button
+              type="submit"
+              onClick={handleSave}
+              secondary
+              className="btn-lg w-[50%]"
+            >
+              Save Draft
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleSaveDraft}
+              className="btn-lg w-[50%]"
+            >
+              Save
+            </Button>
+          </div>
           <p>
             <strong>Created At:</strong> {new Date().toLocaleString()}
           </p>
           <p>
             <strong>Updated At:</strong> {new Date().toLocaleString()}
           </p>
-          <div className="flex w-full gap-5 mt-5">
-            <Button
-              type="submit"
-              onClick={handleSave}
-              secondary
-              className="btn-lg"
-            >
-              Save Draft
-            </Button>
-            <Button type="submit" onClick={handleSaveDraft} className="btn-lg">
-              Save
-            </Button>
-          </div>
         </div>
 
-        <hr className="mb-6 mt-8 border-slate-300" />
-        <ProductImages images={productForm.images} />
-        {/* Images */}
-        <div></div>
+        <hr className="mb-6 mt-8 border-slate-300 dark:border-gray-800" />
+        <ProductFeaturedImages images={ig} onChange={handleImageChange} />
       </div>
     </div>
   );

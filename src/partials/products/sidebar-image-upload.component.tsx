@@ -4,13 +4,17 @@ import { IoClose } from "react-icons/io5";
 import TextBox from "@components/text-box.component";
 import Button from "@components/button.component";
 
-interface FeaturedImage {
+export interface ImageBlob {
   file: File;
   altText: string;
 }
 
-const FeaturedImageUpload: React.FC = () => {
-  const [image, setImage] = useState<FeaturedImage | null>(null);
+const SidebarImageUpload = ({
+  onSave,
+}: {
+  onSave: (img: ImageBlob) => void;
+}) => {
+  const [image, setImage] = useState<ImageBlob | null>(null);
 
   // Handle image selection
   const handleImageChange = (acceptedFiles: File[]) => {
@@ -39,12 +43,18 @@ const FeaturedImageUpload: React.FC = () => {
     multiple: false, // Only allow one file
   });
 
+  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!image) return;
+    onSave(image);
+  };
+
   return (
     <div className="max-w-xs mx-auto space-y-6">
       {/* Drag-and-Drop Area */}
       <div
         {...getRootProps()}
-        className="border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500 cursor-pointer hover:border-blue-500 transition-all"
+        className="border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500 cursor-pointer hover:border-violet-400 transition-all"
       >
         {image ? (
           <div className="relative w-full">
@@ -68,47 +78,28 @@ const FeaturedImageUpload: React.FC = () => {
           </div>
         )}
       </div>
-
       {/* Alt Text Input */}
       {image && (
         <TextBox
           label="Alt Text"
           name="alt-text"
-          className="mb-5"
+          className="mb-2"
           value={image.altText}
           onChange={handleTextAreaChange}
         />
-        // <div>
-        //   <label className="block text-sm font-medium text-gray-700">
-        //     Alt Text
-        //   </label>
-        //   <input
-        //     type="text"
-        //     value={image.altText}
-        //     onChange={(e) => handleAltTextChange(e.target.value)}
-        //     placeholder="Enter alt text"
-        //     className="mt-2 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-        //   />
-        // </div>
       )}
-
       {/* Submit Button */}
-      <Button type="submit" disabled={!image} className="w-full">
-        {image ? "Save Featured Image" : "No Image Selected"}
-      </Button>
-      <button
+      <Button
         type="button"
         disabled={!image}
-        className={`w-full py-2 text-sm rounded-md ${
-          image
-            ? "bg-blue-500 text-white hover:bg-blue-600"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
+        className="btn-lg w-full"
+        secondary
+        onClick={handleSave}
       >
         {image ? "Save Featured Image" : "No Image Selected"}
-      </button>
+      </Button>
     </div>
   );
 };
 
-export default FeaturedImageUpload;
+export default SidebarImageUpload;
