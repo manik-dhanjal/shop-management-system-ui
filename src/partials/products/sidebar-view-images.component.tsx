@@ -100,7 +100,7 @@ const SidebarViewImages = ({
             onClick={() => openModal(image.src, image.alt)}
           >
             {/* Image container with fixed height and centered image */}
-            <div className="flex justify-center items-center h-60 cursor-pointer bg-slate-100 dark:bg-gray-800 rounded-lg overflow-hidden relative">
+            <div className="flex justify-center items-center h-60 cursor-pointer bg-white dark:bg-gray-800 rounded-lg overflow-hidden relative">
               {onDelete && (
                 <button
                   onClick={() => onDelete(index)}
