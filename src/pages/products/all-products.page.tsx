@@ -1,35 +1,105 @@
-import { useState } from 'react';
-import Image01 from '../../shared/media/images/user-36-05.jpg';
-import { Product as ProductType } from './interfaces/product.interface';
-import { IoPencil, IoTrash } from 'react-icons/io5';
+import { useEffect, useState } from 'react';
+import { Product } from './interfaces/product.interface';
+import { IoCube, IoPencil, IoTrash } from 'react-icons/io5';
 import { Pagination } from '@shared/components/pagination.component';
+import {
+	deleteProduct,
+	getPaginatedProducts,
+} from '@shared/clients/product.client';
+import { Pagination as PaginationType } from '@shared/interfaces/pagination.interface';
+import Modal from '@shared/hoc/modal.component';
+import Button from '@shared/components/button.component';
+import { useNavigate } from 'react-router-dom';
+import { useGlobalLoading } from '@shared/hoc/global-loading.component';
+import { useAlert, AlertSeverity } from '@shared/hoc/alert.component';
+import { AxiosError } from 'axios';
 
-const products: ProductType[] = [...Array(10).keys()].map((id) => ({
-	_id: `${id}`,
-	name: 'Alex Shatov',
-	description: 'some random description',
-	sku: 'sku' + id,
-	images: [
-		{
-			src: Image01,
-			alt: 'image01',
-		},
-	],
-	hsn: 'hsn' + id,
-	brand: 'some brand' + id,
-	keywords: [],
-	properties: [],
-	igstRate: 18,
-	cgstRate: 9,
-	sgstRate: 9,
-	createdAt: new Date(),
-	updatedAt: new Date(),
-}));
+const MAX_PRODUCTS_ON_SINGLE_PAGE = 10;
+
+const INITIAL_PAGINATED_PRODUCTS: PaginationType<Product> = {
+	docs: [],
+	pagination: {
+		totalRecords: 0,
+		currentPage: 0,
+		totalPages: 0,
+		nextPage: null,
+		prevPage: null,
+	},
+};
 const AllProductPage = () => {
-	const [activePage, setActivePage] = useState(1);
+	const [products, setProducts] = useState<PaginationType<Product>>(
+		INITIAL_PAGINATED_PRODUCTS
+	);
+	const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+	const navigate = useNavigate();
 	const handlePageChange = (newPage: number) => {
-		setActivePage(newPage);
+		getProducts(newPage);
 	};
+	const { showLoading, hideLoading } = useGlobalLoading();
+	const { addAlert } = useAlert();
+
+	const handleProductDelete = async (productId: string) => {
+		showLoading();
+		try {
+			await deleteProduct(productId);
+			setProductToDelete(null);
+			addAlert(
+				`${productToDelete?.name} product successfully deleted`,
+				AlertSeverity.WARNING
+			);
+			await getProducts(products.pagination.currentPage);
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				addAlert(error.response?.data?.message, AlertSeverity.ERROR);
+			} else if (error instanceof Error) {
+				addAlert(error.message, AlertSeverity.ERROR);
+			} else {
+				addAlert(
+					'Unknown error occured while deleting product',
+					AlertSeverity.ERROR
+				);
+			}
+		}
+		hideLoading();
+	};
+
+	const handleProductEdit = (productId: string) => {
+		navigate(`/product/${productId}/edit`);
+	};
+
+	const getProducts = async (page: number) => {
+		showLoading();
+		try {
+			const response = await getPaginatedProducts(
+				MAX_PRODUCTS_ON_SINGLE_PAGE,
+				page
+			);
+
+			setProducts(response);
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				addAlert(error.response?.data?.message, AlertSeverity.ERROR);
+			} else if (error instanceof Error) {
+				addAlert(error.message, AlertSeverity.ERROR);
+			} else {
+				addAlert(
+					'Unknown error occured while adding product',
+					AlertSeverity.ERROR
+				);
+			}
+		}
+		hideLoading();
+	};
+	useEffect(() => {
+		getProducts(1);
+	}, []);
+	if (products.docs.length === 0)
+		return (
+			<div>
+				<h2 className="text-2xl mb-6">All Products</h2>
+				<div>Products not found</div>
+			</div>
+		);
 	return (
 		<div>
 			<h2 className="text-2xl mb-6">All Products</h2>
@@ -68,20 +138,28 @@ const AllProductPage = () => {
 							</thead>
 							{/* Table body */}
 							<tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-								{products.map((product) => {
+								{products.docs.map((product) => {
 									return (
 										<tr key={product._id}>
 											<td className="p-2 whitespace-nowrap">
 												<div className="flex items-center">
-													<div className="w-10 h-10 shrink-0 mr-2 sm:mr-3">
-														<img
-															className="rounded-full"
-															src={product.images[0].src}
-															width="40"
-															height="40"
-															alt={product.images[0].alt}
-														/>
-													</div>
+													{/* TODO: handle no image */}
+													{product.images.length === 0 ? (
+														<div className="w-10 h-10 shrink-0 mr-2 sm:mr-3 flex justify-center items-center bg-gray-100 dark:bg-gray-700 rounded-full">
+															<IoCube className="text-xl text-gray-300 dark:text-gray-500" />
+														</div>
+													) : (
+														<div className="w-10 h-10 shrink-0 mr-2 sm:mr-3 rounded-full overflow-hidden">
+															<img
+																className="object-cover w-full h-full object-center"
+																src={product.images[0].url}
+																width="40"
+																height="40"
+																alt={product.images[0].alt}
+															/>
+														</div>
+													)}
+
 													<div className="font-medium text-gray-800 dark:text-gray-100">
 														{product.name}
 													</div>
@@ -97,18 +175,24 @@ const AllProductPage = () => {
 												<div className="text-center">{product.hsn}</div>
 											</td>
 											<td className="p-2 whitespace-nowrap">
-												<div className="text-center">
-													{product.createdAt.toLocaleDateString()}
-													{' - '}
-													{product.createdAt.toLocaleTimeString()}
-												</div>
+												{product.createdAt ? (
+													<div className="text-center">
+														{new Date(product.createdAt).toLocaleDateString()}
+														{' - '}
+														{new Date(product.createdAt).toLocaleTimeString()}
+													</div>
+												) : (
+													<div className="text-center">-</div>
+												)}
 											</td>
 											<td className="p-2 whitespace-nowrap">
 												<div className="text-xl flex justify-center gap-5 text-gray-800 dark:text-gray-100">
-													<button>
+													<button
+														onClick={() => handleProductEdit(product._id)}
+													>
 														<IoPencil />
 													</button>
-													<button>
+													<button onClick={() => setProductToDelete(product)}>
 														<IoTrash />
 													</button>
 												</div>
@@ -121,14 +205,27 @@ const AllProductPage = () => {
 					</div>
 				</div>
 			</div>
-			<Pagination
-				activePage={activePage}
-				onChange={handlePageChange}
-				totalPages={20}
-				maxPageToShow={5}
-			/>
+			{products.pagination.totalPages > 1 && (
+				<Pagination
+					activePage={products.pagination.currentPage}
+					onChange={handlePageChange}
+					totalPages={products.pagination.totalPages}
+					maxPageToShow={5}
+				/>
+			)}
+
+			{productToDelete && (
+				<Modal title="Delete Product" onClose={() => setProductToDelete(null)}>
+					Do you want to delete Product: {productToDelete.name}
+					<div className="flex mt-8 gap-5">
+						<Button onClick={() => handleProductDelete(productToDelete._id)}>
+							Delete
+						</Button>
+						<Button onClick={() => setProductToDelete(null)}>Cancel</Button>
+					</div>
+				</Modal>
+			)}
 		</div>
 	);
 };
-
 export default AllProductPage;

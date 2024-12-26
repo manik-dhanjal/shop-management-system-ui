@@ -1,61 +1,86 @@
-import { Image } from "@shared/interfaces/image.interface";
+import { Image } from '@shared/interfaces/image.interface';
 import SidebarImageUpload, {
-  ImageBlob,
-} from "./sidebar-image-upload.component";
-import SidebarViewImages from "./sidebar-view-images.component";
-import { useState } from "react";
+	LocalImageBlob,
+} from './sidebar-image-upload.component';
+import SidebarViewImages from './sidebar-view-images.component';
+import { useState } from 'react';
+import { uploadImage } from '@shared/clients/media-storage.client';
+import { AxiosError } from 'axios';
 
 const ProductFeaturedImages = ({
-  images = [],
-  onChange,
+	images = [],
+	onChange,
 }: {
-  images: Image[];
-  onChange: (img: Image[]) => void;
+	images: Image[];
+	onChange: (img: Image[]) => void;
 }) => {
-  const [isUploadEnabled, setIsUploadEnabled] = useState(false);
-  const handleImageSave = (newImageBlob: ImageBlob) => {
-    console.log(newImageBlob);
-    // do IO operation for uploading image in S3 or somewhere else
-    // add the recieved image url in image records
-    const uploadedImage = {
-      src: "extracted-url.com",
-      alt: newImageBlob.altText,
-    };
-    const updatedImages = [...images, uploadedImage];
-    onChange(updatedImages);
-  };
+	const [isUploadEnabled, setIsUploadEnabled] = useState(false);
+	const [isUploading, setIsUploading] = useState(false);
+	const [errorMsg, setErrorMsg] = useState<string | null>(null);
+	const handleImageSave = async (newImageBlob: LocalImageBlob) => {
+		console.log(newImageBlob);
+		// do IO operation for uploading image in S3 or somewhere else
+		// add the recieved image url in image records
+		setIsUploading(true);
+		try {
+			setErrorMsg(null);
+			const uploadedImage = await uploadImage(newImageBlob);
+			const updatedImages = [...images, uploadedImage];
+			onChange(updatedImages);
+			setIsUploadEnabled(false);
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				setErrorMsg(error.response?.data?.message);
+			} else if (error instanceof Error) {
+				setErrorMsg(error.message);
+			} else {
+				setErrorMsg('Unkown error occured while uploading image');
+			}
+		} finally {
+			setIsUploading(false);
+		}
+	};
 
-  const handleImageDelete = (imageIndex: number) => {
-    console.log("image deleted", images[imageIndex]);
-  };
+	const handleImageDelete = (imageId: string) => {
+		const updatedImages = images.filter((image) => imageId != image._id);
+		onChange(updatedImages);
+	};
 
-  return (
-    <div>
-      <h2 className="mb-3">
-        <span
-          onClick={() => setIsUploadEnabled(false)}
-          className={`cursor-pointer ${
-            !isUploadEnabled ? "text-gray-300" : "text-slate-500"
-          }`}
-        >
-          Featured Images
-        </span>
-        <span
-          onClick={() => setIsUploadEnabled(true)}
-          className={`ml-3 cursor-pointer ${
-            isUploadEnabled ? "text-gray-300" : "text-slate-500"
-          }`}
-        >
-          Upload Image
-        </span>
-      </h2>
-      {images.length === 0 || isUploadEnabled ? (
-        <SidebarImageUpload onSave={handleImageSave} />
-      ) : (
-        <SidebarViewImages images={images} onDelete={handleImageDelete} />
-      )}
-    </div>
-  );
+	return (
+		<div>
+			<h2 className="mb-3">
+				<span
+					onClick={() => setIsUploadEnabled(false)}
+					className={`cursor-pointer ${
+						!isUploadEnabled
+							? 'dark:text-gray-300 text-slate-500'
+							: 'dark:text-slate-500 text-gray-300'
+					}`}
+				>
+					Featured Images
+				</span>
+				<span
+					onClick={() => setIsUploadEnabled(true)}
+					className={`ml-3 cursor-pointer ${
+						isUploadEnabled
+							? 'dark:text-gray-300 text-slate-500'
+							: 'dark:text-slate-500 text-gray-300'
+					}`}
+				>
+					Upload Image
+				</span>
+			</h2>
+			{images.length === 0 || isUploadEnabled ? (
+				<>
+					<SidebarImageUpload onSave={handleImageSave} />
+					{isUploading && <p>Uploading</p>}
+					{errorMsg && <p>{errorMsg}</p>}
+				</>
+			) : (
+				<SidebarViewImages images={images} onDelete={handleImageDelete} />
+			)}
+		</div>
+	);
 };
 
 export default ProductFeaturedImages;
