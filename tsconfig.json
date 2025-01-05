@@ -22,13 +22,14 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@partials/*": ["src/partials/*"],
+      "@features/*": ["src/features/*"],
       "@pages/*": ["src/pages/*"],
       "@shared/*": ["src/shared/*"],
       "@components/*": ["src/shared/components/*"],
-      "@clients/*": ["src/shared/clients/*"],
+      "@clients/*": ["src/shared/api/*"],
       "@media/*": ["src/shared/media/*"],
       "@utils/*": ["src/utils/*"],
+      "@redux/*": ["src/redux/*"],
       "@/*": ["src/*"]
     }
   },
