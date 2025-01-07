@@ -60,7 +60,7 @@ const KeywordInput = ({
 						value={currentValue}
 						onChange={handleInputChange}
 						onKeyDown={handleAdd}
-						className={`text-md border dark:bg-gray-800 bg-white text-gray-700 dark:text-gray-300 border-transparent dark:border-gray-700/60 rounded-lg overflow-hidden px-5 py-3 outline-non inline ${
+						className={`text-md border dark:bg-gray-800 bg-white text-gray-700 dark:text-gray-300 border-transparent dark:border-gray-700/60 rounded-lg overflow-hidden px-5 py-3 outline-none inline ${
 							currentValue
 								? 'opacity-100 w-40 cursor-text'
 								: 'w-12  opacity-0 cursor-pointer'
