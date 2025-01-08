@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useThemeProvider } from '../utils/ThemeContext';
+import { useThemeProvider } from '../shared/context/theme.context';
 
 import { chartColors } from './ChartjsConfig';
 import {

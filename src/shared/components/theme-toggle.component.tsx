@@ -1,9 +1,7 @@
-import React from "react";
-import { useThemeProvider } from "../../utils/ThemeContext";
+import { ThemeType, useThemeProvider } from "../context/theme.context";
 
 export default function ThemeToggle() {
   const { currentTheme, changeCurrentTheme } = useThemeProvider();
-
   return (
     <div>
       <input
@@ -11,9 +9,11 @@ export default function ThemeToggle() {
         name="light-switch"
         id="light-switch"
         className="light-switch sr-only"
-        checked={currentTheme === "light"}
+        checked={currentTheme === ThemeType.LIGHT}
         onChange={() =>
-          changeCurrentTheme(currentTheme === "light" ? "dark" : "light")
+          changeCurrentTheme(
+            currentTheme === ThemeType.LIGHT ? ThemeType.DARK : ThemeType.LIGHT
+          )
         }
       />
       <label
