@@ -9,11 +9,11 @@ import "./charts/ChartjsConfig";
 import Dashboard from "@pages/dashboard/anaytics/analytics-main.page";
 // import AllProductPage from '@pages/dashboard/product/all-products.page';
 
-import HomePage from "@pages/introduction/home/home.page";
+import HomePage from "@shared/introduction/home/home.page";
 import DashboardLayout from "@pages/dashboard/layout/dashboard.layout";
-import IntroductionLayout from "@pages/introduction/layout/introduction.layout";
-import LoginPage from "@pages/introduction/auth/login.page";
-import SignupPage from "@pages/introduction/auth/signup.page";
+import IntroductionLayout from "@shared/introduction/layout/introduction.layout";
+import LoginPage from "@shared/introduction/auth/login.page";
+import SignupPage from "@shared/introduction/auth/signup.page";
 import AddProductPage from "@pages/dashboard/product/add-product.page";
 import { EditProductPage } from "@pages/dashboard/product/edit-product.page";
 import AddShopPage from "@pages/dashboard/shop/add-shop.page";
