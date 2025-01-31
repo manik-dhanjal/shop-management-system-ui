@@ -20,6 +20,7 @@ import AddShopPage from "@pages/dashboard/shop/add-shop.page";
 import AllProductPage from "@pages/dashboard/product/all-products.page";
 import AddEmployeePage from "@pages/dashboard/employee/add-employee.page";
 import AllEmployeePage from "@pages/dashboard/employee/all-employee.page";
+import { EditEmployeePage } from "@pages/dashboard/employee/edit-employee.page";
 
 function App() {
   const location = useLocation();
@@ -57,6 +58,7 @@ function App() {
           <Route path="employee">
             <Route path="add" element={<AddEmployeePage />} />
             <Route path="all" element={<AllEmployeePage />} />
+            <Route path=":employeeId/edit" element={<EditEmployeePage />} />
           </Route>
         </Route>
       </Routes>

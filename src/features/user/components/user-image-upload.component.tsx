@@ -69,7 +69,7 @@ const UserImageUpload = ({
                   src={image.url}
                   className=" w-full h-full object-cover object-center rounded-full"
                 />
-                <div className="flex flex-col justify-center items-center w-full h-full absolute top-0 left-0 bg-gray-900 text-white opacity-0 group-hover:opacity-60 rounded-full transition-opacity dark:bg-slate-200">
+                <div className="flex flex-col justify-center items-center w-full h-full absolute top-0 left-0 bg-gray-900 text-gray-400  dark:text-gray-800 opacity-0 group-hover:opacity-60 rounded-full transition-opacity dark:bg-slate-200">
                   {isLoading ? (
                     <>
                       <CircularProgress size={30} color="inherit" />
@@ -86,7 +86,7 @@ const UserImageUpload = ({
               </div>
             </>
           ) : (
-            <div className="flex flex-col justify-center items-center w-full h-full dark:bg-gray-700 rounded-full text-gray-400 bg-gray-200">
+            <div className="flex flex-col justify-center items-center w-full h-full dark:bg-gray-700 bg-gray-200 rounded-full text-gray-400  dark:text-gray-400">
               {isLoading ? (
                 <>
                   <CircularProgress

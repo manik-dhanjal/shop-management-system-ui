@@ -6,10 +6,12 @@ import { AddUser } from "../../user/interface/user.interface";
 import { AuthApi } from "@shared/api/auth.api";
 import { AxiosError } from "axios";
 import { isArray } from "lodash";
+import { useNavigate } from "react-router-dom";
 
 export const useAddEmployee = () => {
   const { activeShop } = useShop();
   const { addAlert } = useAlert();
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: (newUser: AddUser) => {
       return AuthApi.addEmployee(activeShop._id, newUser);
@@ -23,6 +25,7 @@ export const useAddEmployee = () => {
         `Successfully added ${addedUser.firstName} as your shop's employee. 🥳`,
         AlertSeverity.SUCCESS
       );
+      navigate("/dashboard/employee/all");
     },
     onError: (error) => {
       if (error instanceof AxiosError && error.response?.data.message) {

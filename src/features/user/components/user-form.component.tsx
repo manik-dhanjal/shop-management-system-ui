@@ -8,6 +8,7 @@ import { useYupValidationResolver } from "@shared/hooks/yup.hook";
 import UserImageUpload from "./user-image-upload.component";
 import { Image } from "@shared/interfaces/image.interface";
 import Button from "@mui/material/Button";
+import { User } from "../interface/user.interface";
 
 export interface UserFormTypes {
   firstName: string;
@@ -25,7 +26,9 @@ export interface UserFormTypes {
 interface UserFormProps {
   onSubmit: SubmitHandler<UserFormTypes>;
   isLoading: boolean;
-  initialForm?: UserFormTypes;
+  initialUserData?: Omit<User, "shopsMeta"> & {
+    shopsMeta: { shop: string; roles: string[] }[];
+  };
 }
 
 export const INITIAL_FORM_VALUES: UserFormTypes = {
@@ -43,7 +46,7 @@ export const INITIAL_FORM_VALUES: UserFormTypes = {
 const UserForm: React.FC<UserFormProps> = ({
   onSubmit,
   isLoading,
-  initialForm,
+  initialUserData,
 }: UserFormProps) => {
   const validationSchema = useMemo(
     () =>
@@ -72,11 +75,25 @@ const UserForm: React.FC<UserFormProps> = ({
       }),
     []
   );
-  const [profileImage, setProfileImage] = useState<Image | null>(null);
+  const [profileImage, setProfileImage] = useState<Image | null>(
+    initialUserData?.profileImage || null
+  );
   const resolver = useYupValidationResolver(validationSchema);
   const { control, handleSubmit } = useForm<UserFormTypes>({
     resolver,
-    defaultValues: initialForm || INITIAL_FORM_VALUES,
+    defaultValues: initialUserData
+      ? {
+          firstName: initialUserData.firstName,
+          lastName: initialUserData.lastName,
+          phone: initialUserData.phone,
+          email: initialUserData.email,
+          country: initialUserData.location?.country,
+          address: initialUserData.location?.address,
+          city: initialUserData.location?.city,
+          state: initialUserData.location?.state,
+          pinCode: initialUserData.location?.pinCode,
+        }
+      : INITIAL_FORM_VALUES,
   });
 
   const onFormSubmit = (data: UserFormTypes) => {
