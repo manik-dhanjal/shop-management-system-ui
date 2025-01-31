@@ -29,6 +29,7 @@
     "moment": "^2.29.4",
     "mui-tel-input": "^7.0.0",
     "react": "^18.2.0",
+    "react-avatar-editor": "^13.0.2",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.5",
     "react-flatpickr": "^3.10.13",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.62.9",
+    "@types/react-avatar-editor": "^13.0.3",
     "@types/react-dom": "^18.3.5",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",

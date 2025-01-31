@@ -1,13 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Button } from "@mui/material";
 import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
 import { PhoneFieldControlled } from "@shared/components/form/phone-field-controlled.component";
 import * as yup from "yup";
 import { CountrySelectControlled } from "@shared/components/form/country-select-controlled.component";
 import { useYupValidationResolver } from "@shared/hooks/yup.hook";
+import UserImageUpload from "./user-image-upload.component";
+import { Image } from "@shared/interfaces/image.interface";
+import Button from "@mui/material/Button";
 
-interface UserFormTypes {
+export interface UserFormTypes {
   firstName: string;
   lastName: string;
   phone: string;
@@ -17,9 +19,16 @@ interface UserFormTypes {
   state: string;
   country: string;
   pinCode: string;
+  profileImage?: Image;
 }
 
-const INITIAL_FORM_VALUES: UserFormTypes = {
+interface UserFormProps {
+  onSubmit: SubmitHandler<UserFormTypes>;
+  isLoading: boolean;
+  initialForm?: UserFormTypes;
+}
+
+export const INITIAL_FORM_VALUES: UserFormTypes = {
   firstName: "",
   lastName: "",
   phone: "",
@@ -31,7 +40,11 @@ const INITIAL_FORM_VALUES: UserFormTypes = {
   pinCode: "",
 };
 
-const UserForm: React.FC = () => {
+const UserForm: React.FC<UserFormProps> = ({
+  onSubmit,
+  isLoading,
+  initialForm,
+}: UserFormProps) => {
   const validationSchema = useMemo(
     () =>
       yup.object().shape({
@@ -59,31 +72,41 @@ const UserForm: React.FC = () => {
       }),
     []
   );
+  const [profileImage, setProfileImage] = useState<Image | null>(null);
   const resolver = useYupValidationResolver(validationSchema);
   const { control, handleSubmit } = useForm<UserFormTypes>({
     resolver,
-    defaultValues: INITIAL_FORM_VALUES,
+    defaultValues: initialForm || INITIAL_FORM_VALUES,
   });
 
-  const onSubmit: SubmitHandler<UserFormTypes> = async (data) => {
-    console.log(data);
+  const onFormSubmit = (data: UserFormTypes) => {
+    if (profileImage) {
+      onSubmit({ ...data, profileImage });
+    } else {
+      onSubmit({ ...data });
+    }
   };
 
   return (
     <div className="flex gap-10 justify-center">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onFormSubmit)}
         className="flex gap-10 items-start"
       >
         {/* Left Side of Form , profile will be uploaded here*/}
-        <div className="flex flex-col gap-4 w-[360px]  dark:bg-gray-800 bg-white  rounded-xl ">
+        <div className="flex flex-col w-[360px]  dark:bg-gray-800 bg-white  rounded-xl ">
           <div className="px-6 py-4">
             <h2 className="text-md dark:text-gray-100 text-gray-900">
-              Profile I
+              Profile Image
             </h2>
           </div>
           <hr className=" dark:border-gray-600" />
-          <div className="p-6">//image will be uploaded here</div>
+          <div className="p-6">
+            <UserImageUpload
+              image={profileImage}
+              onChange={(img) => setProfileImage(img)}
+            />
+          </div>
         </div>
 
         <div className="flex flex-col gap-10">
@@ -125,7 +148,6 @@ const UserForm: React.FC = () => {
                 name="email"
                 control={control}
                 label="Email"
-                type="email"
                 className="w-full"
                 placeholder="Enter your email"
               />
@@ -183,7 +205,13 @@ const UserForm: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-end mt-4 pb-6 px-6">
-              <Button variant="contained" size="large" type="submit">
+              <Button
+                variant="contained"
+                size="large"
+                type="submit"
+                loadingPosition="start"
+                loading={isLoading}
+              >
                 Submit
               </Button>
             </div>
