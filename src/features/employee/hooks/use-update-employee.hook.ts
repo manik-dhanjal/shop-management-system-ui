@@ -3,7 +3,7 @@ import { queryClient } from "@/main";
 import { useNavigate } from "react-router-dom";
 import { useShop } from "@shared/hooks/shop.hook";
 import { AddUser } from "../../user/interface/user.interface";
-import { AuthApi } from "@shared/api/auth.api";
+import { EmployeeApi } from "@shared/api/employee.api";
 
 export const useUpdateEmployee = () => {
   const { activeShop } = useShop();
@@ -16,7 +16,7 @@ export const useUpdateEmployee = () => {
       employeeId: string;
       employeeChanges: Partial<AddUser>;
     }) => {
-      return AuthApi.updateEmployee(
+      return EmployeeApi.updateEmployee(
         activeShop._id,
         employeeId,
         employeeChanges

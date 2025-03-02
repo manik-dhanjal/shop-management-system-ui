@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useShop } from "@shared/hooks/shop.hook";
-import { AuthApi } from "@shared/api/auth.api";
+import { EmployeeApi } from "@shared/api/employee.api";
 
 // useQuery Hook
 export const useGetEmployee = (employeeId: string) => {
@@ -8,7 +8,7 @@ export const useGetEmployee = (employeeId: string) => {
   return useQuery({
     queryKey: ["user", employeeId],
     queryFn: async () => {
-      return AuthApi.getEmployee(activeShop._id, employeeId);
+      return EmployeeApi.getEmployee(activeShop._id, employeeId);
     },
   });
 };

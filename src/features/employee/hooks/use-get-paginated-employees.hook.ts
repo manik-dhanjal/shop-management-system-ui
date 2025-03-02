@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useShop } from "@shared/hooks/shop.hook";
 import { AddUser } from "@features/user/interface/user.interface";
-import { AuthApi } from "@shared/api/auth.api";
+import { EmployeeApi } from "@shared/api/employee.api";
 
 // useQuery Hook
 export const useGetPaginatedEmployees = (
@@ -14,7 +14,7 @@ export const useGetPaginatedEmployees = (
   return useQuery({
     queryKey: [
       activeShop._id,
-      "product",
+      "employees",
       "paginated",
       limit,
       page,
@@ -22,7 +22,7 @@ export const useGetPaginatedEmployees = (
       sort,
     ],
     queryFn: async () => {
-      return AuthApi.getPaginatedEmployees(
+      return EmployeeApi.getPaginatedEmployees(
         activeShop._id,
         limit,
         page,

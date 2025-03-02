@@ -3,7 +3,7 @@ import { queryClient } from "@/main";
 import { useShop } from "@shared/hooks/shop.hook";
 import { AlertSeverity, useAlert } from "@shared/context/alert.context";
 import { AddUser } from "../../user/interface/user.interface";
-import { AuthApi } from "@shared/api/auth.api";
+import { EmployeeApi } from "@shared/api/employee.api";
 import { AxiosError } from "axios";
 import { isArray } from "lodash";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +14,7 @@ export const useAddEmployee = () => {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (newUser: AddUser) => {
-      return AuthApi.addEmployee(activeShop._id, newUser);
+      return EmployeeApi.addEmployee(activeShop._id, newUser);
     },
     onSuccess: (addedUser) => {
       queryClient.setQueryData(["user", addedUser._id], addedUser);

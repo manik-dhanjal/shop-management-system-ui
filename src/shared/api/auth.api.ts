@@ -10,7 +10,7 @@ import { Pagination } from "@shared/interfaces/pagination.interface";
 export class AuthApi {
   /** Fetch the current user's profile */
   static async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get<User>("/api/user/me");
+    const response = await apiClient.get<User>("/api/v1/user/me");
     return response.data;
   }
 
@@ -18,7 +18,10 @@ export class AuthApi {
   static async updateUser(
     userData: Partial<SignupRequest>
   ): Promise<AuthTokens> {
-    const response = await apiClient.patch<AuthTokens>("/api/user/", userData);
+    const response = await apiClient.patch<AuthTokens>(
+      "/api/v1/user/",
+      userData
+    );
     return response.data;
   }
 
@@ -27,7 +30,7 @@ export class AuthApi {
     registrationData: SignupRequest
   ): Promise<AuthTokens> {
     const response = await apiClient.post<AuthTokens>(
-      "/api/user/register",
+      "/api/v1/user/register",
       registrationData
     );
     return response.data;
@@ -36,72 +39,8 @@ export class AuthApi {
   /** Log in a user */
   static async loginUser(loginData: LoginRequest): Promise<AuthTokens> {
     const response = await apiClient.post<AuthTokens>(
-      "/api/user/login",
+      "/api/v1/user/login",
       loginData
-    );
-    return response.data;
-  }
-
-  /** create a new employee to shop */
-  static async addEmployee(shopId: string, userData: AddUser): Promise<User> {
-    const response = await apiClient.post<User>(
-      `/api/shop/${shopId}/user/employee`,
-      userData
-    );
-    return response.data;
-  }
-
-  static async getPaginatedEmployees(
-    shopId: string,
-    limit: number,
-    page: number,
-    filter?: Partial<AddUser>,
-    sort?: Record<keyof AddUser, string>
-  ): Promise<
-    Pagination<
-      Omit<User, "shopsMeta"> & {
-        shopsMeta: { shop: string; roles: string[] }[];
-      }
-    >
-  > {
-    const response = await apiClient.post(
-      `/api/shop/${shopId}/user/employee/paginated`,
-      {
-        limit,
-        page,
-        filter,
-        sort,
-      }
-    );
-    return response.data;
-  }
-
-  static async getEmployee(
-    shopId: string,
-    employeeId: string
-  ): Promise<
-    Omit<User, "shopsMeta"> & {
-      shopsMeta: { shop: string; roles: string[] }[];
-    }
-  > {
-    const response = await apiClient.get(
-      `/api/shop/${shopId}/user/employee/${employeeId}`
-    );
-    return response.data;
-  }
-
-  static async updateEmployee(
-    shopId: string,
-    employeeId: string,
-    user: Partial<AddUser>
-  ): Promise<
-    Omit<User, "shopsMeta"> & {
-      shopsMeta: { shop: string; roles: string[] }[];
-    }
-  > {
-    const response = await apiClient.patch(
-      `/api/shop/${shopId}/user/employee/${employeeId}`,
-      user
     );
     return response.data;
   }

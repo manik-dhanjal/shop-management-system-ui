@@ -7,8 +7,6 @@ import "./charts/ChartjsConfig";
 
 // Import pages
 import Dashboard from "@pages/dashboard/anaytics/analytics-main.page";
-// import AllProductPage from '@pages/dashboard/product/all-products.page';
-
 import HomePage from "@shared/introduction/home/home.page";
 import DashboardLayout from "@pages/dashboard/layout/dashboard.layout";
 import IntroductionLayout from "@shared/introduction/layout/introduction.layout";
@@ -21,6 +19,8 @@ import AllProductPage from "@pages/dashboard/product/all-products.page";
 import AddEmployeePage from "@pages/dashboard/employee/add-employee.page";
 import AllEmployeePage from "@pages/dashboard/employee/all-employee.page";
 import { EditEmployeePage } from "@pages/dashboard/employee/edit-employee.page";
+import { AddOrderPage } from "@pages/dashboard/order/add-order.page";
+import { AllOrdersPage } from "@pages/dashboard/order/all-orders.page";
 
 function App() {
   const location = useLocation();
@@ -59,6 +59,10 @@ function App() {
             <Route path="add" element={<AddEmployeePage />} />
             <Route path="all" element={<AllEmployeePage />} />
             <Route path=":employeeId/edit" element={<EditEmployeePage />} />
+          </Route>
+          <Route path="order">
+            <Route path="add" element={<AddOrderPage />} />
+            <Route path="all" element={<AllOrdersPage />} />
           </Route>
         </Route>
       </Routes>
