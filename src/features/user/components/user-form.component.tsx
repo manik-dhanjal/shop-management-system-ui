@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
 import { PhoneFieldControlled } from "@shared/components/form/phone-field-controlled.component";
@@ -9,6 +9,7 @@ import UserImageUpload from "./user-image-upload.component";
 import { Image } from "@shared/interfaces/image.interface";
 import Button from "@mui/material/Button";
 import { User } from "../interface/user.interface";
+import { StateSelectControlled } from "@shared/components/form/state-select-controlled.component";
 
 export interface UserFormTypes {
   firstName: string;
@@ -79,7 +80,7 @@ const UserForm: React.FC<UserFormProps> = ({
     initialUserData?.profileImage || null
   );
   const resolver = useYupValidationResolver(validationSchema);
-  const { control, handleSubmit } = useForm<UserFormTypes>({
+  const { control, handleSubmit, watch, setValue } = useForm<UserFormTypes>({
     resolver,
     defaultValues: initialUserData
       ? {
@@ -95,6 +96,11 @@ const UserForm: React.FC<UserFormProps> = ({
         }
       : INITIAL_FORM_VALUES,
   });
+  const selectedCountry = watch("country");
+  useEffect(() => {
+    // Reset state when country changes to prevent mismatched state-country pairs
+    setValue("state", "", { shouldValidate: true, shouldDirty: true });
+  }, [selectedCountry, setValue]);
 
   const onFormSubmit = (data: UserFormTypes) => {
     if (profileImage) {
@@ -197,12 +203,12 @@ const UserForm: React.FC<UserFormProps> = ({
                   className="w-full"
                   placeholder="Enter your city"
                 />
-                <TextFieldControlled
+                <StateSelectControlled
                   name="state"
                   control={control}
                   label="State"
                   className="w-full"
-                  placeholder="Enter your state"
+                  country={selectedCountry}
                 />
 
                 <CountrySelectControlled

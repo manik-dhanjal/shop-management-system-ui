@@ -42,10 +42,12 @@
     "react-transition-group": "^4.4.5",
     "redux-thunk": "^3.1.0",
     "slick-carousel": "^1.8.1",
+    "tailwind-scrollbar": "^3.1.0",
     "tsconfig-paths": "^4.2.0",
     "uuid": "^11.0.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "country-state-city": "^3.2.1"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.62.9",

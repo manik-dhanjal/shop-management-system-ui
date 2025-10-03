@@ -1,186 +1,205 @@
-import React, { useState } from 'react';
-import { ProductFormType } from '@features/product/interfaces/product.interface';
-import { ProductProperty } from '@features/product/interfaces/product-property.interface';
-import TextBox from '@shared/components/form/text-box.component';
-import TextArea from '@shared/components/form/text-area.component';
-import KeywordInput from '@shared/components/form/keyword-input.component';
-import TableInput from '@shared/components/form/table-input.component';
-import Button from '@shared/components/form/button.component';
-import ProductFeaturedImages from '@features/product/components/product-featured-images.component';
-import { Image } from '@shared/interfaces/image.interface';
-import NumberInput from '@shared/components/form/number-input.component';
-import { omit as _omit } from 'lodash';
+import React, { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { useYupValidationResolver } from "@shared/hooks/yup.hook";
+import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
+import { ProductFormType } from "@features/product/interfaces/product.interface";
+import { ProductProperty } from "@features/product/interfaces/product-property.interface";
+import KeywordInput from "@shared/components/form/keyword-input.component";
+import TableInput from "@shared/components/form/table-input.component";
+import ProductFeaturedImages from "@features/product/components/product-featured-images.component";
+import { Image } from "@shared/interfaces/image.interface";
+import Button from "@mui/material/Button";
+import SectionBlock from "@shared/components/section-block";
+import { Breadcrumbs, Link, Typography } from "@mui/material";
+import { ProductInventoryTable } from "./product-inventory-table";
 
 const INITIAL_PRODUCT_FORM: ProductFormType = {
-	name: '',
-	description: '',
-	sku: '',
-	images: [],
-	hsn: '',
-	brand: '',
-	keywords: [],
-	properties: [],
-	igstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
-	cgstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
-	sgstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
+  name: "",
+  description: "",
+  sku: "",
+  images: [],
+  hsn: "",
+  brand: "",
+  keywords: [],
+  properties: [],
+  igstRate: 0,
+  cgstRate: 0,
+  sgstRate: 0,
+  inventory: [],
 };
 
 interface ProductFormProps {
-	formTitle: string;
-	initialFormValues?: ProductFormType;
-	onSubmit: (product: ProductFormType) => void;
+  formTitle: string;
+  initialFormValues?: ProductFormType;
+  onSubmit: (product: ProductFormType) => void;
 }
 
 export const ProductForm = ({
-	formTitle,
-	initialFormValues = INITIAL_PRODUCT_FORM,
-	onSubmit,
+  formTitle,
+  initialFormValues = INITIAL_PRODUCT_FORM,
+  onSubmit,
 }: ProductFormProps) => {
-	const [productForm, setProductForm] =
-		useState<ProductFormType>(initialFormValues);
-	const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		onSubmit(productForm);
-	};
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setProductForm({
-			...productForm,
-			[e.target.name]: e.target.value,
-		});
-	};
-	const handleNumberChange = (name: string, value: number) => {
-		setProductForm({
-			...productForm,
-			[name]: value,
-		});
-	};
-	const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setProductForm({
-			...productForm,
-			[e.target.name]: e.target.value,
-		});
-	};
-	const handleKeywordChange = (name: string, value: string[]) => {
-		setProductForm({
-			...productForm,
-			[name]: value,
-		});
-	};
-	const handleTableChange = (name: string, value: ProductProperty[]) => {
-		setProductForm({
-			...productForm,
-			[name]: value,
-		});
-	};
-	const handleImageChange = (images: Image[]) => {
-		setProductForm({
-			...productForm,
-			images,
-		});
-	};
-	return (
-		<div className="flex gap-10">
-			<div className="flex-1">
-				<h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 mb-6">
-					{formTitle}
-				</h1>
-				<form className="">
-					<TextBox
-						label="Product Name"
-						name="name"
-						value={productForm.name}
-						onChange={handleInputChange}
-						className="mb-5"
-						required
-					/>
-					<TextArea
-						label="Description"
-						name="description"
-						className="mb-5"
-						value={productForm.description}
-						onChange={handleTextAreaChange}
-					/>
-					<TextBox
-						label="Brand Name"
-						name="brand"
-						value={productForm.brand}
-						onChange={handleInputChange}
-						className="mb-5"
-						required
-					/>
-					<div className="flex gap-5 mb-5 ">
-						<TextBox
-							label="SKU"
-							name="sku"
-							value={productForm.sku}
-							onChange={handleInputChange}
-							className="flex-1"
-							required
-						/>
-						<TextBox
-							label="HSN Code"
-							name="hsn"
-							value={productForm.hsn}
-							onChange={handleInputChange}
-							className="flex-1"
-							required
-						/>
-					</div>
-					<div className="flex gap-5 mb-5 ">
-						<NumberInput
-							label="SGST"
-							name="sgstRate"
-							value={productForm.sgstRate}
-							onNumberChange={handleNumberChange}
-							className="flex-1"
-							required
-						/>
-						<NumberInput
-							label="CGST"
-							name="cgstRate"
-							value={productForm.cgstRate}
-							onNumberChange={handleNumberChange}
-							className="flex-1"
-							required
-						/>
-						<NumberInput
-							label="IGST"
-							name="igstRate"
-							value={productForm.igstRate}
-							onNumberChange={handleNumberChange}
-							className="flex-1"
-							required
-						/>
-					</div>
-					<KeywordInput
-						label="Keywords"
-						name="keywords"
-						value={productForm.keywords}
-						onChange={handleKeywordChange}
-						className="mb-5"
-					/>
-					<TableInput
-						name="properties"
-						onChange={handleTableChange}
-						value={productForm.properties}
-						label="Properties"
-						header={{ name: 'Name', value: 'Value' }}
-						className="mb-5"
-					/>
-				</form>
-			</div>
-			<div className="bg-slate-300 w-[1px] dark:bg-gray-800" />
-			<div className="w-[330px]">
-				<Button type="submit" onClick={handleSave} className="btn-lg w-full">
-					Save
-				</Button>
+  const validationSchema = useMemo(
+    () =>
+      yup.object().shape({
+        name: yup.string().required("Product Name is required"),
+        brand: yup.string().required("Brand is required"),
+        sku: yup.string().required("SKU is required"),
+        hsn: yup.string().required("HSN Code is required"),
+        description: yup.string().optional(),
+        sgstRate: yup
+          .number()
+          .typeError("SGST must be a number")
+          .min(0, "SGST cannot be negative")
+          .required("SGST is required"),
+        cgstRate: yup
+          .number()
+          .typeError("CGST must be a number")
+          .min(0, "CGST cannot be negative")
+          .required("CGST is required"),
+        igstRate: yup
+          .number()
+          .typeError("IGST must be a number")
+          .min(0, "IGST cannot be negative")
+          .required("IGST is required"),
+      }),
+    []
+  );
 
-				<hr className="mb-6 mt-8 border-slate-300 dark:border-gray-800" />
-				<ProductFeaturedImages
-					images={productForm.images}
-					onChange={handleImageChange}
-				/>
-			</div>
-		</div>
-	);
+  const resolver = useYupValidationResolver(validationSchema);
+  const { control, handleSubmit } = useForm<ProductFormType>({
+    resolver,
+    defaultValues: initialFormValues ?? INITIAL_PRODUCT_FORM,
+  });
+
+  // Local state for complex, non-MUI controlled components
+  const [images, setImages] = useState<Image[]>(initialFormValues.images ?? []);
+  const [keywords, setKeywords] = useState<string[]>(
+    initialFormValues.keywords ?? []
+  );
+  const [properties, setProperties] = useState<ProductProperty[]>(
+    initialFormValues.properties ?? []
+  );
+
+  const [inventory, setInventory] = useState(initialFormValues.inventory ?? []);
+
+  const onFormSubmit = (data: ProductFormType) => {
+    onSubmit({ ...data, images, keywords, properties, inventory });
+  };
+
+  return (
+    <form className="" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Breadcrumbs>
+            <Link underline="hover" color="inherit" href="/">
+              Dashboard
+            </Link>
+            <Link
+              underline="hover"
+              color="inherit"
+              href="/material-ui/getting-started/installation/"
+            >
+              Products
+            </Link>
+            <Typography sx={{ color: "text.primary" }}>Add</Typography>
+          </Breadcrumbs>
+        </div>
+        <Button variant="contained" color="primary" size="large" type="submit">
+          Save Product
+        </Button>
+      </div>
+      <div className="flex gap-8 mb-8">
+        <div className="flex-1 gap-8 flex flex-col">
+          <SectionBlock title="Product Details" className="w-full">
+            <div className="flex flex-col gap-6">
+              <TextFieldControlled
+                label="Product Name"
+                name="name"
+                control={control}
+                className="w-full"
+                placeholder="Enter product name"
+              />
+              <TextFieldControlled
+                label="Description"
+                name="description"
+                control={control}
+                className="mb-5 w-full"
+                placeholder="Enter description"
+                multiline
+                minRows={3}
+              />
+              <TextFieldControlled
+                label="Brand Name"
+                name="brand"
+                control={control}
+                className="mb-5 w-full"
+                placeholder="Enter brand name"
+              />
+              <div className="flex gap-5">
+                <TextFieldControlled
+                  label="SKU"
+                  name="sku"
+                  control={control}
+                  className="flex-1"
+                  placeholder="Enter SKU"
+                />
+                <TextFieldControlled
+                  label="HSN Code"
+                  name="hsn"
+                  control={control}
+                  className="flex-1"
+                  placeholder="Enter HSN code"
+                />
+              </div>
+              <div className="flex gap-5">
+                <TextFieldControlled
+                  label="SGST"
+                  name="sgstRate"
+                  control={control}
+                  type="number"
+                  className="flex-1"
+                  placeholder="0"
+                />
+                <TextFieldControlled
+                  label="CGST"
+                  name="cgstRate"
+                  control={control}
+                  type="number"
+                  className="flex-1"
+                  placeholder="0"
+                />
+                <TextFieldControlled
+                  label="IGST"
+                  name="igstRate"
+                  control={control}
+                  type="number"
+                  className="flex-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </SectionBlock>
+          <TableInput
+            name="properties"
+            onChange={(_, v) => setProperties(v)}
+            value={properties}
+            label="Properties"
+            header={{ name: "Name", value: "Value" }}
+          />
+        </div>
+        <div className="max-w-[360px] w-full flex flex-col gap-8">
+          <ProductFeaturedImages images={images} onChange={setImages} />
+          <KeywordInput
+            label="Keywords"
+            name="keywords"
+            value={keywords}
+            onChange={(_, v) => setKeywords(v)}
+          />
+        </div>
+      </div>
+      <ProductInventoryTable inventory={inventory} />
+    </form>
+  );
 };

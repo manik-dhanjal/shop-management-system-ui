@@ -31,6 +31,7 @@ export const PhoneFieldControlled = ({
           helperText={fieldState.error?.message}
           defaultCountry={defaultCountry}
           onChange={(value) => field.onChange(value)}
+          size="small"
         />
       )}
     />

@@ -87,6 +87,7 @@ export default function CountrySelect({
           borderRadius: "8px", // Change borderRadius of popup indicator
         },
       }}
+      size="small"
       className={className}
       options={countries}
       getOptionLabel={(option: CountryType) => option.label}
