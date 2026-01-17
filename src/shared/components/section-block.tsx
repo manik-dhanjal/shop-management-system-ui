@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 interface SectionBlockProps {
   children: ReactNode;
@@ -15,25 +15,25 @@ interface SectionBlockProps {
  * @param {string} title - The title of the form section.
  * @returns {JSX.Element} The rendered FormSectionLayout component.
  */
-const SectionBlock = ({
-  children,
-  title,
-  className,
-  ...props
-}: SectionBlockProps): JSX.Element => {
-  return (
-    <div
-      className={`dark:bg-gray-800 bg-white rounded-xl ${className}`}
-      {...props}
-    >
-      <div className="px-6 py-3 text-sm dark:text-gray-300 text-gray-900">
-        {title}
-      </div>
+const SectionBlock = React.forwardRef<HTMLDivElement, SectionBlockProps>(
+  ({ children, title, className = "", ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={`dark:bg-gray-800 bg-white rounded-xl ${className}`}
+        {...props}
+      >
+        <div className="px-6 py-3 text-sm dark:text-gray-300 text-gray-900">
+          {title}
+        </div>
 
-      <hr className="dark:border-gray-600" />
-      <div className="w-full p-6">{children}</div>
-    </div>
-  );
-};
+        <hr className="dark:border-gray-600" />
+        <div className="w-full p-6">{children}</div>
+      </div>
+    );
+  },
+);
+
+SectionBlock.displayName = "SectionBlock";
 
 export default SectionBlock;

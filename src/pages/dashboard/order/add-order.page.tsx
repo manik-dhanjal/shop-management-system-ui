@@ -1,13 +1,7 @@
 import { OrderItemList } from "@features/order/components/order-item-list.component";
 import OrderSummary from "@features/order/components/order-summary.components";
 import OrderTaxes from "@features/order/components/order-taxes.components";
-import SelectProductPopup from "@features/order/components/select-product-popup.component";
-import { BillingDetails } from "@features/order/interface/billing-details.interface";
-import {
-  OrderItem,
-  OrderItemPopulated,
-} from "@features/order/interface/order-item.interface";
-import { PaymentDetails } from "@features/order/interface/payment-details.interface";
+import { OrderItemPopulated } from "@features/order/interface/order-item.interface";
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { CountrySelectControlled } from "@shared/components/form/country-select-controlled.component";
 import { PhoneFieldControlled } from "@shared/components/form/phone-field-controlled.component";
@@ -125,7 +119,6 @@ export const AddOrderPage = ({
           },
     }
   );
-  console.log(watch("customer.billingAddress"));
   const billingCountry = watch("customer.billingAddress.country");
   const shippingCountry = watch("customer.shippingAddress.country");
   const billingState = watch("customer.billingAddress.state");

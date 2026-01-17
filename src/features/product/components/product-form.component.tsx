@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useYupValidationResolver } from "@shared/hooks/yup.hook";
@@ -12,7 +12,8 @@ import { Image } from "@shared/interfaces/image.interface";
 import Button from "@mui/material/Button";
 import SectionBlock from "@shared/components/section-block";
 import { Breadcrumbs, Link, Typography } from "@mui/material";
-import { ProductInventoryTable } from "./product-inventory-table";
+import DropdownControlled from "@shared/components/form/dropdown-controlled.component";
+import { MEASURING_UNIT_OPTIONS } from "@features/product/enum/measuring-unit.options";
 
 const INITIAL_PRODUCT_FORM: ProductFormType = {
   name: "",
@@ -26,7 +27,7 @@ const INITIAL_PRODUCT_FORM: ProductFormType = {
   igstRate: 0,
   cgstRate: 0,
   sgstRate: 0,
-  inventory: [],
+  measuringUnit: "",
 };
 
 interface ProductFormProps {
@@ -82,10 +83,8 @@ export const ProductForm = ({
     initialFormValues.properties ?? []
   );
 
-  const [inventory, setInventory] = useState(initialFormValues.inventory ?? []);
-
   const onFormSubmit = (data: ProductFormType) => {
-    onSubmit({ ...data, images, keywords, properties, inventory });
+    onSubmit({ ...data, images, keywords, properties });
   };
 
   return (
@@ -103,7 +102,7 @@ export const ProductForm = ({
             >
               Products
             </Link>
-            <Typography sx={{ color: "text.primary" }}>Add</Typography>
+            <Typography sx={{ color: "text.primary" }}>{formTitle}</Typography>
           </Breadcrumbs>
         </div>
         <Button variant="contained" color="primary" size="large" type="submit">
@@ -179,6 +178,12 @@ export const ProductForm = ({
                   placeholder="0"
                 />
               </div>
+              <DropdownControlled
+                name="measuringUnit"
+                control={control}
+                label="Unit"
+                options={MEASURING_UNIT_OPTIONS}
+              />
             </div>
           </SectionBlock>
           <TableInput
@@ -199,7 +204,6 @@ export const ProductForm = ({
           />
         </div>
       </div>
-      <ProductInventoryTable inventory={inventory} />
     </form>
   );
 };

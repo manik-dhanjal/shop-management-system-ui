@@ -1,75 +1,164 @@
 import SectionBlock from "@shared/components/section-block";
-import { InventoryPopulated } from "../interfaces/inventory.interface";
+import { Inventory } from "../../inventory/interface/inventory.interface";
 import Button from "@shared/components/form/button.component";
+import { useState } from "react";
+import { DateView } from "@shared/components/date-view.component";
+import { IoPencil, IoTrash } from "react-icons/io5";
+import { useGetPaginatedInventory } from "@features/inventory/hooks/use-get-paginated-inventory.hook";
+import { omit as _omit } from "lodash";
+import { InventoryItemEditModal } from "@features/inventory/components/inventory-item-edit-modal.component";
+import { Product } from "../interfaces/product.interface";
 
-interface ProductInventoryTableProp
-  extends React.HTMLAttributes<HTMLDivElement> {
-  inventory: InventoryPopulated[];
+interface ProductInventoryTableProp {
+  product: Product;
+  className?: string;
 }
 
 export const ProductInventoryTable = ({
+  product,
   className,
-  inventory,
 }: ProductInventoryTableProp) => {
+  const [selectedItem, setSelectedItem] = useState<Inventory | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const inventory = useGetPaginatedInventory(10, 1, {
+    product: product._id,
+  });
+  const closeModal = () => {
+    setIsOpen(false);
+    setSelectedItem(null);
+  };
+
+  const handleInventoryDelete = (index: number) => {
+    console.log("Delete inventory at index:", index);
+  };
+
+  const handleInventoryAdd = () => {
+    setSelectedItem(null);
+    setIsOpen(true);
+  };
+  if (inventory.isLoading) {
+    return <div>Loading inventory...</div>;
+  }
+  if (inventory.isError) {
+    return <div>Error loading inventory: {inventory.error.message}</div>;
+  }
   return (
-    <SectionBlock
-      title={
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg">Inventory</h3>{" "}
-          <Button type="button" secondary>
-            Add Inventory
-          </Button>
-        </div>
-      }
-      className={className}
-    >
-      <div className="overflow-x-auto">
-        <table className="table-auto w-full dark:text-gray-300">
-          {/* Table header */}
-          <thead className="text-xs uppercase text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 rounded-sm">
-            <tr>
-              <th className="p-2">
-                <div className="font-semibold text-left">Supplier Name</div>
-              </th>
-              <th className="p-2">
-                <div className="font-semibold text-center">Purchase Date</div>
-              </th>
-              <th className="p-2">
-                <div className="font-semibold text-center">Qty</div>
-              </th>
-              <th className="p-2">
-                <div className="font-semibold text-center">Purchase Price</div>
-              </th>
-              <th className="p-2">
-                <div className="font-semibold text-right">Sell Price</div>
-              </th>
-            </tr>
-          </thead>
-          {/* Table body */}
-          <tbody className="text-sm font-medium divide-y divide-gray-100 dark:divide-gray-700/60">
-            {inventory.map((item, index) => (
-              <tr key={"inventory-item" + index}>
-                <td className="p-2 whitespace-nowrap overflow-ellipsis">
-                  {/* Product Name */}
-                  <div className="text-gray-800 dark:text-gray-100">
-                    {item.supplier.name}
+    <>
+      {" "}
+      <SectionBlock
+        title={
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg">Inventory</h3>{" "}
+            <Button type="button" secondary onClick={handleInventoryAdd}>
+              Add Inventory
+            </Button>
+          </div>
+        }
+        className={className}
+      >
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full dark:text-gray-300">
+            {/* Table header */}
+            <thead className="text-xs uppercase text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 rounded-sm">
+              <tr>
+                <th className="p-2">
+                  <div className="font-semibold text-left">Supplier Name</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center">Purchased At</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center">Initial Qty</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center">Current Qty</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center">
+                    Purchase Price
                   </div>
-                </td>
-                {/* Unit Price */}
-                <td className="p-2">
-                  <div className="text-center">₹ {item.purchasePrice}</div>
-                </td>
-                {/* Quantity */}
-                <td className="p-2">
-                  <div className="text-center text-green-500">
-                    {item.quantity}
-                  </div>
-                </td>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-right">Sell Price</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-right">Actions</div>
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </SectionBlock>
+            </thead>
+            {/* Table body */}
+            <tbody className="text-sm font-medium divide-y divide-gray-100 dark:divide-gray-700/60">
+              {inventory.data?.docs.map((item, index) => (
+                <tr key={"inventory-item" + index}>
+                  <td className="p-2 whitespace-nowrap overflow-ellipsis">
+                    {/* Product Name */}
+                    <div className="text-gray-800 dark:text-gray-100">
+                      {item.supplier.name}
+                    </div>
+                  </td>
+
+                  {/* Purchased At*/}
+                  <td className="p-2">
+                    <DateView date={item.createdAt} />
+                  </td>
+
+                  {/* Initial Quantity */}
+                  <td className="p-2">
+                    <div className="text-center">
+                      {item.initialQuantity} {item.measuringUnit}
+                    </div>
+                  </td>
+
+                  {/* Current Quantity */}
+                  <td className="p-2">
+                    <div className="text-center text-green-500">
+                      {item.currentQuantity} {item.measuringUnit}
+                    </div>
+                  </td>
+
+                  {/* Purchase Price */}
+                  <td className="p-2">
+                    <div className="text-center">
+                      {item.purchasePrice} {item.currency}
+                    </div>
+                  </td>
+
+                  {/* Sell Price */}
+                  <td className="p-2">
+                    <div className="text-right">
+                      {item.sellPrice} {item.currency}
+                    </div>
+                  </td>
+
+                  <td className="p-2 whitespace-nowrap">
+                    <div className="text-xl flex justify-end gap-3 text-gray-800 dark:text-gray-100">
+                      <button
+                        onClick={() => {
+                          setSelectedItem(item);
+                          console.log(index);
+                          setIsOpen(true);
+                        }}
+                      >
+                        <IoPencil />
+                      </button>
+                      <button onClick={() => handleInventoryDelete(index)}>
+                        <IoTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionBlock>
+      <InventoryItemEditModal
+        selectedItem={selectedItem}
+        closeModal={closeModal}
+        isOpen={isOpen}
+        isEditing={true}
+        product={product}
+      />
+    </>
   );
 };

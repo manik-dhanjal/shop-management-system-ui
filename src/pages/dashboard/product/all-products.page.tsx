@@ -10,6 +10,7 @@ import { useAlert } from "@shared/context/alert.context";
 import { usePaginatedProducts } from "@features/product/hooks/use-get-paginated-products.hook";
 import { useDeleteProduct } from "@features/product/hooks/use-delete-product.hook";
 import { CircularProgress } from "@mui/material";
+import { DateView } from "@shared/components/date-view.component";
 
 const MAX_PRODUCTS_ON_SINGLE_PAGE = 10;
 
@@ -135,15 +136,7 @@ const AllProductPage = () => {
                         <div className="text-center">{product.hsn}</div>
                       </td>
                       <td className="p-2 whitespace-nowrap">
-                        {product.createdAt ? (
-                          <div className="text-center">
-                            {new Date(product.createdAt).toLocaleDateString()}
-                            {" - "}
-                            {new Date(product.createdAt).toLocaleTimeString()}
-                          </div>
-                        ) : (
-                          <div className="text-center">-</div>
-                        )}
+                        <DateView date={product.createdAt} />
                       </td>
                       <td className="p-2 whitespace-nowrap">
                         <div className="text-xl flex justify-center gap-5 text-gray-800 dark:text-gray-100">

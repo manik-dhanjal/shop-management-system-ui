@@ -6,9 +6,17 @@ import { ProductForm } from "@features/product/components/product-form.component
 const AddProductPage = () => {
   const { mutate } = useAddProduct();
   const handleSave = async (product: ProductFormType) => {
-    mutate(product);
+    mutate({
+      ...product,
+    });
   };
-  return <ProductForm formTitle="Add new product" onSubmit={handleSave} />;
+
+  return (
+    <>
+      <ProductForm formTitle="Add" onSubmit={handleSave} />
+      {/* <ProductInventoryTable productId="vsfvdfvdfv" /> */}
+    </>
+  );
 };
 
 export default AddProductPage;

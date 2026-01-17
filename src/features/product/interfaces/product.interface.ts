@@ -1,6 +1,5 @@
 import { Image } from "@shared/interfaces/image.interface";
 import { ProductProperty } from "./product-property.interface";
-import { Inventory, InventoryPopulated } from "./inventory.interface";
 
 export interface Product {
   _id: string;
@@ -17,15 +16,20 @@ export interface Product {
   sgstRate: number; //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
   createdAt: string; // Date string
   updatedAt: string; // Date string
-  inventory: InventoryPopulated[];
+  stock: number; // Total stock across all inventories
+  measuringUnit: string; // Default measuring unit for the product (e.g., pcs, kg)
   __v: number;
 }
 
-export interface AddProduct
-  extends Omit<Product, "_id" | "createdAt" | "updatedAt" | "__v"> {
+export interface AddProduct extends Omit<
+  Product,
+  "_id" | "createdAt" | "updatedAt" | "__v" | "stock"
+> {
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface ProductFormType
-  extends Omit<Product, "_id" | "createdAt" | "updatedAt" | "__v"> {}
+export interface ProductFormType extends Omit<
+  Product,
+  "_id" | "createdAt" | "updatedAt" | "__v" | "stock"
+> {}
