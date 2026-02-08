@@ -40,7 +40,7 @@ const SelectProductPopup = ({
 
   const paginatedProducts = usePaginatedProducts(
     MAX_PRODUCTS_ON_SINGLE_PAGE,
-    currentPage
+    currentPage,
   );
 
   const handlePageChange = (newPage: number) => {
@@ -50,7 +50,7 @@ const SelectProductPopup = ({
   const handleProductQtyChange = (product: Product, quantity: number) => {
     if (quantity === 0) {
       const updatedOrderItems = orderItems.filter(
-        (orderItem) => orderItem.productId._id !== product._id
+        (orderItem) => orderItem.productId._id !== product._id,
       );
 
       onOrderItemsChange(updatedOrderItems);
@@ -62,9 +62,11 @@ const SelectProductPopup = ({
           return {
             ...orderItem,
             quantity,
-            taxableValue: product.inventory[0].sellPrice * quantity,
+            // taxableValue: product.sellPrice * quantity,
+            taxableValue: 0,
             taxes: [],
-            totalPrice: product.inventory[0].sellPrice * quantity,
+            // totalPrice: product.inventory[0].sellPrice * quantity,
+            totalPrice: 0,
           };
         } else {
           return orderItem;
@@ -75,9 +77,11 @@ const SelectProductPopup = ({
         updatedOrderItems.push({
           productId: product,
           quantity,
-          taxableValue: product.inventory[0].sellPrice * quantity,
+          // taxableValue: product.inventory[0].sellPrice * quantity,
+          taxableValue: 0,
           taxes: [],
-          totalPrice: product.inventory[0].sellPrice * quantity,
+          // totalPrice: product.inventory[0].sellPrice * quantity,
+          totalPrice: 0,
         });
       }
 
@@ -172,7 +176,7 @@ const SelectProductPopup = ({
                           quantity={
                             orderItems.find(
                               (orderItem) =>
-                                orderItem.productId._id === product._id
+                                orderItem.productId._id === product._id,
                             )?.quantity || 0
                           }
                         />

@@ -2,7 +2,7 @@ import SectionBlock from "@shared/components/section-block";
 import { Inventory } from "../interface/inventory.interface";
 import Button from "@shared/components/form/button.component";
 import { Modal } from "@mui/material";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Shop } from "@features/shop/interface/shop.interface";
 import * as yup from "yup";
 import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
@@ -15,6 +15,8 @@ import { MEASURING_UNIT_OPTIONS } from "@features/product/enum/measuring-unit.op
 import { omit as _omit } from "lodash";
 import { useUpdateInventoryItem } from "@features/inventory/hooks/use-update-inventory-item.hook";
 import { Product } from "@features/product/interfaces/product.interface";
+import { useAddInventoryItem } from "../hooks/use-add-inventory-item.hook";
+import SupplierDropdownControlled from "@shared/components/form/supplier-select.component";
 
 export interface InventoryFormType extends Omit<
   Inventory,
@@ -24,11 +26,11 @@ export interface InventoryFormType extends Omit<
   | "__v"
   | "shop"
   | "product"
-  | "supplier"
   | "purchasedAt"
+  | "supplier"
 > {
   _id?: string;
-  supplier: Shop<string> | null;
+  supplier: string | null;
   purchasedAt: Date | null;
 }
 
@@ -104,6 +106,7 @@ export const InventoryItemEditModal = ({
         measuringUnit: yup.string().required("Measuring Unit is required"),
         currency: yup.string().required("Currency is required"),
         purchasedAt: yup.date().required("Purchased At is required"),
+        supplier: yup.string().required("supplier must be selected"),
       }),
     [],
   );
@@ -120,7 +123,7 @@ export const InventoryItemEditModal = ({
           measuringUnit: selectedItem.measuringUnit,
           currency: selectedItem.currency,
           purchasedAt: new Date(selectedItem.purchasedAt),
-          supplier: selectedItem.supplier,
+          supplier: selectedItem.supplier._id,
           invoiceUrl: selectedItem.invoiceUrl,
         }
       : INITIAL_INVENTORY_FORM,
@@ -128,7 +131,7 @@ export const InventoryItemEditModal = ({
 
   // Watch for changes in selectedItem and update form values
   useEffect(() => {
-    if (selectedItem) {
+    if (selectedItem && isEditing) {
       reset({
         currentQuantity: selectedItem.currentQuantity,
         initialQuantity: selectedItem.initialQuantity,
@@ -137,7 +140,7 @@ export const InventoryItemEditModal = ({
         measuringUnit: selectedItem.measuringUnit,
         currency: selectedItem.currency,
         purchasedAt: new Date(selectedItem.purchasedAt),
-        supplier: selectedItem.supplier,
+        supplier: selectedItem.supplier._id,
         invoiceUrl: selectedItem.invoiceUrl,
       });
     } else {
@@ -146,22 +149,39 @@ export const InventoryItemEditModal = ({
   }, [selectedItem, reset]);
 
   const updateInventory = useUpdateInventoryItem();
+  const addInventory = useAddInventoryItem();
   const onFormSubmit = async (data: InventoryFormType) => {
     console.log("Form submitted with data:", data);
     // Handle form submission logic here (e.g., call API to add/update inventory)
-    if (!selectedItem || !selectedItem?.shop) return;
 
-    updateInventory.mutate({
-      inventoryId: selectedItem?._id || "",
-      newInventoryItem: {
-        ...data,
-        _id: selectedItem._id,
-        supplier: data.supplier?._id as string,
-        purchasedAt: data.purchasedAt?.toISOString() as string,
-        shop: selectedItem.shop,
-        product: selectedItem.product,
-      },
-    });
+    if (isEditing) {
+      if (!selectedItem || !selectedItem?.shop) return;
+
+      updateInventory.mutate({
+        inventoryId: selectedItem?._id || "",
+        newInventoryItem: {
+          ...data,
+          _id: selectedItem._id,
+          supplier: data.supplier,
+          purchasedAt: data.purchasedAt?.toISOString() as string,
+          shop: selectedItem.shop,
+          product: selectedItem.product,
+        },
+      });
+    } else {
+      if (!product) return;
+
+      addInventory.mutate({
+        newInventoryItem: {
+          ..._omit(data, ["_id"]),
+          supplier: data.supplier,
+          purchasedAt: data.purchasedAt?.toISOString() as string,
+          shop: product.shop as string,
+          product: product._id,
+        },
+      });
+    }
+
     closeModal();
   };
   return (
@@ -230,6 +250,11 @@ export const InventoryItemEditModal = ({
               label="Invoice URL"
               type="text"
               fullWidth
+            />
+            <SupplierDropdownControlled
+              name="supplier"
+              control={control}
+              label="Supplier"
             />
           </div>
           <div className="flex justify-end mt-6 gap-4">

@@ -1,5 +1,5 @@
 import SectionBlock from "@shared/components/section-block";
-import { Inventory } from "../../inventory/interface/inventory.interface";
+import { Inventory } from "../interface/inventory.interface";
 import Button from "@shared/components/form/button.component";
 import { useState } from "react";
 import { DateView } from "@shared/components/date-view.component";
@@ -7,7 +7,10 @@ import { IoPencil, IoTrash } from "react-icons/io5";
 import { useGetPaginatedInventory } from "@features/inventory/hooks/use-get-paginated-inventory.hook";
 import { omit as _omit } from "lodash";
 import { InventoryItemEditModal } from "@features/inventory/components/inventory-item-edit-modal.component";
-import { Product } from "../interfaces/product.interface";
+import { Product } from "../../product/interfaces/product.interface";
+import { Pagination } from "@shared/components/pagination.component";
+
+const MAX_INVENTORY_ITEMS_ON_SINGLE_PAGE = 10;
 
 interface ProductInventoryTableProp {
   product: Product;
@@ -19,28 +22,45 @@ export const ProductInventoryTable = ({
   className,
 }: ProductInventoryTableProp) => {
   const [selectedItem, setSelectedItem] = useState<Inventory | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const inventory = useGetPaginatedInventory(10, 1, {
-    product: product._id,
-  });
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+  const inventory = useGetPaginatedInventory(
+    MAX_INVENTORY_ITEMS_ON_SINGLE_PAGE,
+    currentPage,
+    {
+      product: product._id,
+    },
+  );
   const closeModal = () => {
     setIsOpen(false);
     setSelectedItem(null);
+    setIsEditing(false);
   };
 
-  const handleInventoryDelete = (index: number) => {
-    console.log("Delete inventory at index:", index);
+  const handleInventoryDelete = (item: Inventory) => {
+    console.log("Delete inventory item:", item);
   };
 
   const handleInventoryAdd = () => {
     setSelectedItem(null);
+    setIsEditing(false);
     setIsOpen(true);
   };
-  if (inventory.isLoading) {
-    return <div>Loading inventory...</div>;
-  }
+
+  const handleInventoryItemEdit = (item: Inventory) => {
+    setSelectedItem(item);
+    setIsEditing(true);
+    setIsOpen(true);
+  };
   if (inventory.isError) {
     return <div>Error loading inventory: {inventory.error.message}</div>;
+  }
+  if (inventory.isLoading || !inventory.data) {
+    return <div>Loading inventory...</div>;
   }
   return (
     <>
@@ -132,16 +152,10 @@ export const ProductInventoryTable = ({
 
                   <td className="p-2 whitespace-nowrap">
                     <div className="text-xl flex justify-end gap-3 text-gray-800 dark:text-gray-100">
-                      <button
-                        onClick={() => {
-                          setSelectedItem(item);
-                          console.log(index);
-                          setIsOpen(true);
-                        }}
-                      >
+                      <button onClick={() => handleInventoryItemEdit(item)}>
                         <IoPencil />
                       </button>
-                      <button onClick={() => handleInventoryDelete(index)}>
+                      <button onClick={() => handleInventoryDelete(item)}>
                         <IoTrash />
                       </button>
                     </div>
@@ -151,12 +165,20 @@ export const ProductInventoryTable = ({
             </tbody>
           </table>
         </div>
+        {inventory.data.pagination.totalPages > 1 && (
+          <Pagination
+            activePage={inventory.data.pagination.currentPage}
+            onChange={handlePageChange}
+            totalPages={inventory.data.pagination.totalPages}
+            maxPageToShow={5}
+          />
+        )}
       </SectionBlock>
       <InventoryItemEditModal
         selectedItem={selectedItem}
         closeModal={closeModal}
         isOpen={isOpen}
-        isEditing={true}
+        isEditing={isEditing}
         product={product}
       />
     </>

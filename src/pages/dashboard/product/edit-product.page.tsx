@@ -5,7 +5,7 @@ import { useGetProduct } from "@features/product/hooks/use-get-product.hook";
 import { ProductForm } from "@features/product/components/product-form.component";
 import { CircularProgress } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { ProductInventoryTable } from "@features/product/components/product-inventory-table";
+import { ProductInventoryTable } from "@features/inventory/components/product-inventory-table";
 
 export const EditProductPage = () => {
   const { productId } = useParams();

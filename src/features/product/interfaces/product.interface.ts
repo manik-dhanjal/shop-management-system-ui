@@ -18,12 +18,13 @@ export interface Product {
   updatedAt: string; // Date string
   stock: number; // Total stock across all inventories
   measuringUnit: string; // Default measuring unit for the product (e.g., pcs, kg)
+  shop: string; // Shop ID
   __v: number;
 }
 
 export interface AddProduct extends Omit<
   Product,
-  "_id" | "createdAt" | "updatedAt" | "__v" | "stock"
+  "_id" | "createdAt" | "updatedAt" | "__v" | "stock" | "shop"
 > {
   createdAt?: string;
   updatedAt?: string;
@@ -31,5 +32,5 @@ export interface AddProduct extends Omit<
 
 export interface ProductFormType extends Omit<
   Product,
-  "_id" | "createdAt" | "updatedAt" | "__v" | "stock"
+  "_id" | "createdAt" | "updatedAt" | "__v" | "stock" | "shop"
 > {}

@@ -22,7 +22,7 @@ export const useAddInventoryItem = () => {
           activeShop._id,
           "inventory",
           "paginated",
-          addedInventory.product,
+          { filter: { product: addedInventory.product } },
         ],
       });
       addAlert(`inventory item successfully added 🥳`, AlertSeverity.SUCCESS);

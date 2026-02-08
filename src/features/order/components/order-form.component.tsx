@@ -1,233 +1,325 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { OrderItemList } from "@features/order/components/order-item-list.component";
+import OrderSummary from "@features/order/components/order-summary.components";
+import OrderTaxes from "@features/order/components/order-taxes.components";
+import { OrderItemPopulated } from "@features/order/interface/order-item.interface";
+import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { CountrySelectControlled } from "@shared/components/form/country-select-controlled.component";
+import { PhoneFieldControlled } from "@shared/components/form/phone-field-controlled.component";
+import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
+import SectionBlock from "@shared/components/section-block";
+import { useYupValidationResolver } from "@shared/hooks/yup.hook";
+import { Location } from "@shared/interfaces/location.interface";
+import { useEffect, useMemo, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { StateSelectControlled } from "@shared/components/form/state-select-controlled.component";
+import * as yup from "yup";
+import { useAuth } from "@shared/hooks/auth.hooks";
 
 export interface OrderFormTypes {
-  // customer: string,
-  items: OrderItemFormTypes[];
-  description?: string;
-  gstTotal: number;
-  totalAmount: number;
-  paymentMethod: string;
-  paymentStatus: string;
-  // transactionId?: string;
-}
-
-export interface OrderItemFormTypes {
-  product: string;
-  quantity: number;
-  measuringUnit: string;
-  currency: string;
-  price: number;
-  discount?: number;
-  gstRate: number;
-}
-
-interface OrderFormProps {
-  onSubmit: SubmitHandler<OrderFormTypes>;
-  isLoading: boolean;
+  customer: {
+    name: string;
+    phone: string;
+    email?: string;
+    gstin?: string;
+    billingAddress: Location;
+    shippingAddress?: Location;
+  };
+  items: OrderItemPopulated[];
+  billing: {
+    discounts: number;
+    roundOff: number;
+  };
 }
 
 export const INITIAL_FORM_VALUES: OrderFormTypes = {
+  customer: {
+    name: "",
+    phone: "",
+    email: "",
+    gstin: "",
+    billingAddress: {
+      address: "",
+      country: "India",
+      state: "",
+      city: "",
+      pinCode: "",
+    },
+  },
   items: [],
-  description: "",
-  gstTotal: 0,
-  totalAmount: 0,
-  paymentMethod: "",
-  paymentStatus: "",
+  billing: {
+    discounts: 0,
+    roundOff: 0,
+  },
 };
 
-// const UserForm: React.FC<UserFormProps> = ({
-//   onSubmit,
-//   isLoading,
-//   initialUserData,
-// }: UserFormProps) => {
-//   const validationSchema = useMemo(
-//     () =>
-//       yup.object().shape({
-//         firstName: yup
-//           .string()
-//           .required("First Name is required")
-//           .matches(/^[a-zA-Z]+$/, "First Name should only contain letters"),
-//         lastName: yup
-//           .string()
-//           .required("Last Name is required")
-//           .matches(/^[a-zA-Z]+$/, "Last Name should only contain letters"),
-//         phone: yup.string().required("Phone number is required"),
-//         email: yup
-//           .string()
-//           .required("Email is required")
-//           .email("Email is not valid"),
-//         country: yup.string().required("Country is required"),
-//         address: yup.string().required("Address is required"),
-//         city: yup.string().required("City is required"),
-//         state: yup.string().required("State is required"),
-//         pinCode: yup
-//           .string()
-//           .required("Pin Code is required")
-//           .matches(/^\d{6}$/, "Pin Code should be exactly 6 digits"),
-//       }),
-//     []
-//   );
-//   const [profileImage, setProfileImage] = useState<Image | null>(
-//     initialUserData?.profileImage || null
-//   );
-//   const resolver = useYupValidationResolver(validationSchema);
-//   const { control, handleSubmit } = useForm<UserFormTypes>({
-//     resolver,
-//     defaultValues: initialUserData
-//       ? {
-//           firstName: initialUserData.firstName,
-//           lastName: initialUserData.lastName,
-//           phone: initialUserData.phone,
-//           email: initialUserData.email,
-//           country: initialUserData.location?.country,
-//           address: initialUserData.location?.address,
-//           city: initialUserData.location?.city,
-//           state: initialUserData.location?.state,
-//           pinCode: initialUserData.location?.pinCode,
-//         }
-//       : INITIAL_FORM_VALUES,
-//   });
+interface OrderFormProps {
+  formTitle: string;
+  initialFormValues?: OrderFormTypes;
+  onSubmit: (product: OrderFormTypes) => void;
+}
+export const OrderForm = ({
+  formTitle,
+  initialFormValues,
+  onSubmit,
+}: OrderFormProps) => {
+  const validationSchema = useMemo(
+    () =>
+      yup.object().shape({
+        customer: yup.object().shape({
+          name: yup
+            .string()
+            .required("Customer Name is required")
+            .matches(/^[a-zA-Z]+$/, "First Name should only contain letters"),
+          phone: yup.string().required("Phone number is required"),
+          email: yup.string().optional().email("Email is not valid"),
+          billingAddress: yup.object().shape({
+            address: yup.string().required("Address is required"),
+            country: yup.string().required("Country is required"),
+            state: yup.string().required("State is required"),
+            city: yup.string().required("City is required"),
+            pinCode: yup
+              .string()
+              .required("Pincode is required")
+              .matches(/^[0-9]{6}$/, {
+                message: "Pincode should be 6 digits",
+                excludeEmptyString: true,
+              }),
+          }),
+        }),
+        billing: yup.object().shape({
+          discounts: yup.number().positive().integer().default(0),
+          roundOff: yup.number().positive().integer().default(0),
+        }),
+      }),
+    [],
+  );
+  const [addShippingAddress, setAddShippingAddress] = useState(true);
+  const [orderItems, setOrderItems] = useState<OrderItemPopulated[]>([]);
+  const auth = useAuth();
+  const resolver = useYupValidationResolver(validationSchema);
+  const { control, handleSubmit, watch, setValue } = useForm<OrderFormTypes>({
+    resolver,
+    defaultValues: initialFormValues || {
+      ...INITIAL_FORM_VALUES,
+      customer: {
+        ...INITIAL_FORM_VALUES.customer,
+        billingAddress: {
+          ...INITIAL_FORM_VALUES.customer.billingAddress,
+          country: auth.activeShop?.location.country || "",
+          state: auth.activeShop?.location.state || "",
+          pinCode: auth.activeShop?.location.pinCode || "",
+          address: auth.activeShop?.location.address || "",
+          city: auth.activeShop?.location.city || "",
+        },
+      },
+    },
+  });
+  const billingCountry = watch("customer.billingAddress.country");
+  const shippingCountry = watch("customer.shippingAddress.country");
+  const billingState = watch("customer.billingAddress.state");
+  const shippingState = watch("customer.shippingAddress.state");
 
-//   const onFormSubmit = (data: UserFormTypes) => {
-//     if (profileImage) {
-//       onSubmit({ ...data, profileImage });
-//     } else {
-//       onSubmit({ ...data });
-//     }
-//   };
+  useEffect(() => {
+    if (!billingCountry)
+      setValue("customer.billingAddress.state", "", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+  }, [billingCountry, setValue]);
+  useEffect(() => {
+    if (!shippingCountry)
+      setValue("customer.shippingAddress.state", "", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+  }, [shippingCountry, setValue]);
 
-//   return (
-//     <div className="flex gap-10 justify-center">
-//       <form
-//         onSubmit={handleSubmit(onFormSubmit)}
-//         className="flex gap-10 items-start"
-//       >
-//         {/* Left Side of Form , profile will be uploaded here*/}
-//         <div className="flex flex-col w-[360px]  dark:bg-gray-800 bg-white  rounded-xl ">
-//           <div className="px-6 py-4">
-//             <h2 className="text-md dark:text-gray-100 text-gray-900">
-//               Profile Image
-//             </h2>
-//           </div>
-//           <hr className=" dark:border-gray-600" />
-//           <div className="p-6">
-//             <UserImageUpload
-//               image={profileImage}
-//               onChange={(img) => setProfileImage(img)}
-//             />
-//           </div>
-//         </div>
+  const onFormSubmit = (data: OrderFormTypes) => {
+    console.log({ ...data, items: orderItems });
+    onSubmit(data);
+  };
 
-//         <div className="flex flex-col gap-10">
-//           {/* Right Side of Form */}
-//           <div className="w-max-[600px] dark:bg-gray-800 bg-white  rounded-xl">
-//             <div className="px-6 py-4">
-//               <h2 className="text-md dark:text-gray-100 text-gray-900">
-//                 Personal Details
-//               </h2>
-//             </div>
+  // Watch for changes in billing.discounts and billing.roundOff
 
-//             <hr className=" dark:border-gray-600" />
-//             <div className="grid grid-cols-2 gap-y-8 gap-x-6 w-full p-6 ">
-//               <TextFieldControlled
-//                 name="firstName"
-//                 control={control}
-//                 label="First Name"
-//                 className="w-full"
-//                 placeholder="Enter your first name"
-//               />
+  return (
+    <>
+      <h2>{formTitle}</h2>
+      <form onSubmit={handleSubmit(onFormSubmit)}>
+        <div className="flex justify-between items-center mb-10">
+          <div className="flex justify-start items-center gap-4">
+            <label className="dark:text-white  text-slate-900">
+              Invoice ID:
+            </label>
+            <TextField
+              variant="standard"
+              className="w-[100px]"
+              placeholder="#1001"
+              prefix="#"
+            />
+          </div>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            type="submit"
+          >
+            Save Order
+          </Button>
+        </div>
 
-//               <TextFieldControlled
-//                 name="lastName"
-//                 control={control}
-//                 label="Last Name"
-//                 className="w-full"
-//                 placeholder="Enter your last name"
-//               />
+        <div className="flex gap-10">
+          {/* Right Side of Form */}
+          <div className="max-w-[360px] w-full flex flex-col gap-8">
+            {/* customer details */}
+            <SectionBlock title="Customer Details:" className="w-full">
+              <div className="flex gap-6 flex-col">
+                <TextFieldControlled
+                  name="customer.name"
+                  control={control}
+                  label="Name"
+                  className="w-full"
+                  placeholder="Enter customer name"
+                  required={true}
+                />
 
-//               <PhoneFieldControlled
-//                 name="phone"
-//                 control={control}
-//                 label="Phone"
-//                 defaultCountry="IN"
-//                 className="w-full"
-//                 placeholder="Enter your phone number"
-//               />
-//               <TextFieldControlled
-//                 name="email"
-//                 control={control}
-//                 label="Email"
-//                 className="w-full"
-//                 placeholder="Enter your email"
-//               />
-//             </div>
-//           </div>
+                <PhoneFieldControlled
+                  name="customer.phone"
+                  control={control}
+                  label="Phone"
+                  defaultCountry="IN"
+                  className="w-full"
+                  placeholder="Enter your phone number"
+                />
+                <TextFieldControlled
+                  name="customer.gstin"
+                  control={control}
+                  label="GSTIN (Optional)"
+                  className="w-full"
+                  placeholder="Enter your GST Number"
+                  required={false}
+                />
+                <TextFieldControlled
+                  name="customer.email"
+                  control={control}
+                  label="Email (Optional)"
+                  className="w-full"
+                  placeholder="Enter your email"
+                  required={false}
+                />
+              </div>
+            </SectionBlock>
+            {/* billing address */}
+            <SectionBlock title="Billing Address:">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4 w-full">
+                <TextFieldControlled
+                  name="customer.billingAddress.address"
+                  control={control}
+                  label="Address"
+                  className="w-full col-span-2"
+                  placeholder="Enter your address"
+                />
 
-//           {/* Right Side of Form */}
-//           <div className="w-max-[600px] dark:bg-gray-800 bg-white  rounded-xl">
-//             <div className="px-6 py-4">
-//               <h2 className="text-md dark:text-gray-100 text-gray-900">
-//                 Address
-//               </h2>
-//             </div>
+                <TextFieldControlled
+                  name="customer.billingAddress.city"
+                  control={control}
+                  label="City"
+                  className="w-full"
+                  placeholder="Enter your city"
+                />
+                <StateSelectControlled
+                  name="customer.billingAddress.state"
+                  control={control}
+                  label="State"
+                  className="w-full"
+                  country={billingCountry}
+                />
 
-//             <hr className=" dark:border-gray-600" />
-//             <div className="flex gap-4 justify-stretch p-6 pt-6">
-//               <div className="grid grid-cols-2 gap-y-8 gap-x-6 w-full">
-//                 <TextFieldControlled
-//                   name="address"
-//                   control={control}
-//                   label="Address"
-//                   className="w-full col-span-2"
-//                   placeholder="Enter your address"
-//                 />
+                <CountrySelectControlled
+                  name="customer.billingAddress.country"
+                  control={control}
+                  label="Country"
+                  defaultCountry="India"
+                  className="w-full"
+                />
+                <TextFieldControlled
+                  name="customer.billingAddress.pinCode"
+                  control={control}
+                  label="Pincode"
+                  className="w-full"
+                  placeholder="Enter your pincode"
+                />
+                <FormControlLabel
+                  className="w-full col-span-2"
+                  control={
+                    <Checkbox
+                      checked={addShippingAddress}
+                      onChange={(e) => setAddShippingAddress(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label="Shipping Address same as a Billing Address"
+                />
+              </div>
+            </SectionBlock>
+            {!addShippingAddress && (
+              <SectionBlock title="Shipping Address:">
+                <div className="grid grid-cols-2 gap-y-6 gap-x-4 w-full">
+                  <TextFieldControlled
+                    name="customer.shippingAddress.address"
+                    control={control}
+                    label="Address"
+                    className="w-full col-span-2"
+                    placeholder="Enter your address"
+                  />
 
-//                 <TextFieldControlled
-//                   name="city"
-//                   control={control}
-//                   label="City"
-//                   className="w-full"
-//                   placeholder="Enter your city"
-//                 />
-//                 <TextFieldControlled
-//                   name="state"
-//                   control={control}
-//                   label="State"
-//                   className="w-full"
-//                   placeholder="Enter your state"
-//                 />
+                  <TextFieldControlled
+                    name="customer.shippingAddress.city"
+                    control={control}
+                    label="City"
+                    className="w-full"
+                    placeholder="Enter your city"
+                  />
+                  <StateSelectControlled
+                    name="customer.shippingAddress.state"
+                    control={control}
+                    label="State"
+                    className="w-full"
+                    country={shippingCountry}
+                  />
 
-//                 <CountrySelectControlled
-//                   name="country"
-//                   control={control}
-//                   label="Country"
-//                   defaultCountry="India"
-//                   className="w-full"
-//                 />
-//                 <TextFieldControlled
-//                   name="pinCode"
-//                   control={control}
-//                   label="Pincode"
-//                   className="w-full"
-//                   placeholder="Enter your pincode"
-//                 />
-//               </div>
-//             </div>
-//             <div className="flex justify-end mt-4 pb-6 px-6">
-//               <Button
-//                 variant="contained"
-//                 size="large"
-//                 type="submit"
-//                 disabled={isLoading}
-//               >
-//                 {isLoading ? "Submitting..." : "Submit"}
-//               </Button>
-//             </div>
-//           </div>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
+                  <CountrySelectControlled
+                    name="customer.shippingAddress.country"
+                    control={control}
+                    label="Country"
+                    defaultCountry="India"
+                    className="w-full"
+                  />
+                  <TextFieldControlled
+                    name="customer.shippingAddress.pinCode"
+                    control={control}
+                    label="Pincode"
+                    className="w-full"
+                    placeholder="Enter your pincode"
+                  />
+                </div>
+              </SectionBlock>
+            )}
+          </div>
 
-// export default UserForm;
+          <div className="w-full  flex flex-col gap-8 items-start">
+            <OrderItemList
+              orderItems={orderItems}
+              shippingCountry={shippingCountry || billingCountry}
+              shippingState={shippingState || billingState}
+              onOrderItemsChange={(newItems) => setOrderItems(newItems)}
+            />
+            <div className="flex gap-5 w-full items-start">
+              <OrderTaxes />
+              <OrderSummary control={control} orderItems={orderItems} />
+            </div>
+          </div>
+        </div>
+      </form>
+    </>
+  );
+};

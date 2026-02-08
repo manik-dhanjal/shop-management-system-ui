@@ -32,7 +32,7 @@ function Sidebar({
 
   const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
   const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true",
   );
 
   // close on click outside
@@ -320,7 +320,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          <li className="mb-1 last:mb-0">
+                          {/* <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="/dashboard/product/inventory"
@@ -335,7 +335,7 @@ function Sidebar({
                                 Inventory
                               </span>
                             </NavLink>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </React.Fragment>
