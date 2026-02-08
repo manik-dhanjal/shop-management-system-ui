@@ -1,11 +1,10 @@
 import { Shop } from "@features/shop/interface/shop.interface";
 import { Image } from "@shared/interfaces/image.interface";
 import { Location } from "@shared/interfaces/location.interface";
-export interface AddUser
-  extends Omit<
-    User,
-    "_id" | "__v" | "isActive" | "profileImage" | "createdAt" | "updatedAt"
-  > {
+export interface AddUser extends Omit<
+  User,
+  "_id" | "__v" | "isActive" | "profileImage" | "createdAt" | "updatedAt"
+> {
   profileImage?: string;
 }
 

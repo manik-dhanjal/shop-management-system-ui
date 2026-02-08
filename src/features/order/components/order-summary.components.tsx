@@ -1,7 +1,7 @@
 import SectionBlock from "@shared/components/section-block";
 import { Control, useWatch } from "react-hook-form";
 import { OrderItemPopulated } from "../interface/order-item.interface";
-import { AddOrderFormTypes } from "@pages/dashboard/order/add-order.page";
+import { OrderFormTypes } from "./order-form.component";
 import { NumberFieldControlled } from "@shared/components/form/number-input-controller.component";
 
 interface OrderSummaryProps {
@@ -12,19 +12,19 @@ interface OrderSummaryProps {
 const OrderSummary = ({ orderItems, control }: OrderSummaryProps) => {
   const subTotal = orderItems.reduce(
     (total, orderItem) => orderItem.taxableValue + total,
-    0
+    0,
   );
 
   const totalTaxes = orderItems.reduce((totalTax, orderItem) => {
     return (
       orderItem.taxes.reduce(
         (orderTaxTotal, tax) => tax.amount + orderTaxTotal,
-        0
+        0,
       ) + totalTax
     );
   }, 0);
 
-  const watch = useWatch<AddOrderFormTypes>({ control });
+  const watch = useWatch<OrderFormTypes>({ control });
 
   const totalPayable =
     totalTaxes +

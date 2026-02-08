@@ -10,7 +10,7 @@ import SectionBlock from "@shared/components/section-block";
 import { useYupValidationResolver } from "@shared/hooks/yup.hook";
 import { Location } from "@shared/interfaces/location.interface";
 import { useEffect, useMemo, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { StateSelectControlled } from "@shared/components/form/state-select-controlled.component";
 import * as yup from "yup";
 import { useAuth } from "@shared/hooks/auth.hooks";

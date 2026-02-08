@@ -2,11 +2,9 @@ import { useState } from "react";
 import { Product } from "../../../features/product/interfaces/product.interface";
 import { IoCube, IoPencil, IoTrash } from "react-icons/io5";
 import { Pagination } from "@shared/components/pagination.component";
-import { Pagination as PaginationType } from "@shared/interfaces/pagination.interface";
 import Modal from "@shared/components/hoc/modal.component";
 import Button from "@shared/components/form/button.component";
 import { useNavigate } from "react-router-dom";
-import { useAlert } from "@shared/context/alert.context";
 import { usePaginatedProducts } from "@features/product/hooks/use-get-paginated-products.hook";
 import { useDeleteProduct } from "@features/product/hooks/use-delete-product.hook";
 import { CircularProgress } from "@mui/material";
@@ -14,16 +12,6 @@ import { DateView } from "@shared/components/date-view.component";
 
 const MAX_PRODUCTS_ON_SINGLE_PAGE = 10;
 
-const INITIAL_PAGINATED_PRODUCTS: PaginationType<Product> = {
-  docs: [],
-  pagination: {
-    totalRecords: 0,
-    currentPage: 0,
-    totalPages: 0,
-    nextPage: null,
-    prevPage: null,
-  },
-};
 const AllProductPage = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -34,7 +22,7 @@ const AllProductPage = () => {
   };
   const paginatedProducts = usePaginatedProducts(
     MAX_PRODUCTS_ON_SINGLE_PAGE,
-    currentPage
+    currentPage,
   );
   const { mutate } = useDeleteProduct();
 

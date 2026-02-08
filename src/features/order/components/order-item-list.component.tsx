@@ -26,7 +26,7 @@ export const OrderItemList = ({
 
   const handleOrderItemRemove = (productId: string) => {
     const newList = orderItems.filter(
-      (orderItem) => orderItem.productId._id !== productId
+      (orderItem) => orderItem.productId._id !== productId,
     );
     onOrderItemsChange(newList);
   };
@@ -122,7 +122,7 @@ const TableRow = ({
   shippingState,
 }: TableRowProps) => {
   const auth = useAuth();
-  if (orderItem.productId.inventory.length === 0)
+  if (orderItem.productId.stock === 0)
     return (
       <tr>
         <td className="p-2 whitespace-nowrap overflow-ellipsis">
@@ -136,7 +136,6 @@ const TableRow = ({
       </tr>
     );
 
-  const inventory = orderItem.productId.inventory[0];
   return (
     <tr>
       <td className="p-2 whitespace-nowrap overflow-ellipsis">
@@ -147,7 +146,8 @@ const TableRow = ({
       </td>
       {/* Unit Price */}
       <td className="p-2">
-        <div className="text-center">₹ {inventory.sellPrice}</div>
+        {/* TODO: update schema to store sell price in product */}
+        <div className="text-center">₹ {orderItem.productId.stock}</div>
       </td>
       {/* Quantity */}
       <td className="p-2">

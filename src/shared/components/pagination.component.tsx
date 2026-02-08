@@ -1,4 +1,3 @@
-import React from "react";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 export interface PaginationType {
   totalPages: number;
@@ -51,7 +50,7 @@ export const Pagination = ({
     if (pagesToShow.length === 0) return;
     if (totalPages <= pagesToShow[pagesToShow.length - 1]) return;
     const middleIndex = Math.floor(
-      (totalPages - pagesToShow[pagesToShow.length - 1]) / 2
+      (totalPages - pagesToShow[pagesToShow.length - 1]) / 2,
     );
     onChange(pagesToShow[pagesToShow.length - 1] + middleIndex);
   };

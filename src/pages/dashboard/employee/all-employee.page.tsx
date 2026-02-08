@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { User } from "@features/user/interface/user.interface";
 import { useNavigate } from "react-router-dom";
 import { useGetPaginatedEmployees } from "@features/employee/hooks/use-get-paginated-employees.hook";
@@ -6,7 +6,7 @@ import { Button, CircularProgress } from "@mui/material";
 import { Pagination } from "@shared/components/pagination.component";
 import { FaUser } from "react-icons/fa6";
 import { useAuth } from "@shared/hooks/auth.hooks";
-import { IoPencil, IoTrash } from "react-icons/io5";
+import { IoPencil } from "react-icons/io5";
 import Modal from "@shared/components/hoc/modal.component";
 
 const MAX_USERS_ON_SINGLE_PAGE = 10;
@@ -27,11 +27,13 @@ function AllEmployeePage() {
   };
   const paginatedEmployees = useGetPaginatedEmployees(
     MAX_USERS_ON_SINGLE_PAGE,
-    currentPage
+    currentPage,
   );
   // const { mutate } = useDeleteProduct();
 
-  const handleEmployeeDelete = async (employeeId: string) => {};
+  const handleEmployeeDelete = async (employeeId: string) => {
+    console.log("TODO: Delete employee with id:", employeeId);
+  };
 
   const handleEmployeeEdit = (employeeId: string) => {
     navigate(`/dashboard/employee/${employeeId}/edit`);

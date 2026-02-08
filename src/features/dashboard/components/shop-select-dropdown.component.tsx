@@ -1,8 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import Transition from "@utils/Transition";
-
-import UserAvatar from "@shared/media/images/user-avatar-32.png";
 import { useAuth } from "@shared/hooks/auth.hooks";
 
 interface ShopSelectDropdownProps {

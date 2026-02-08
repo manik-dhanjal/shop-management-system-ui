@@ -2,8 +2,7 @@ import SectionBlock from "@shared/components/section-block";
 import { Inventory } from "../interface/inventory.interface";
 import Button from "@shared/components/form/button.component";
 import { Modal } from "@mui/material";
-import { useMemo, useEffect, useState } from "react";
-import { Shop } from "@features/shop/interface/shop.interface";
+import { useMemo, useEffect } from "react";
 import * as yup from "yup";
 import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
 import { useYupValidationResolver } from "@shared/hooks/yup.hook";
@@ -30,7 +29,7 @@ export interface InventoryFormType extends Omit<
   | "supplier"
 > {
   _id?: string;
-  supplier: string | null;
+  supplier: string;
   purchasedAt: Date | null;
 }
 
@@ -49,7 +48,7 @@ const INITIAL_INVENTORY_FORM: InventoryFormType = {
   measuringUnit: MeasuringUnit.PIECES,
   currency: "",
   purchasedAt: null,
-  supplier: null,
+  supplier: "",
   invoiceUrl: "",
 };
 

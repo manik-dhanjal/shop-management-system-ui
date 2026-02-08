@@ -1,11 +1,10 @@
+import { User } from "@features/user/interface/user.interface";
 import { apiClient } from "./client.api";
 import {
   LoginRequest,
   SignupRequest,
   AuthTokens,
 } from "@shared/interfaces/auth-context.interface";
-import { AddUser, User } from "@features/user/interface/user.interface";
-import { Pagination } from "@shared/interfaces/pagination.interface";
 
 export class AuthApi {
   /** Fetch the current user's profile */
@@ -16,22 +15,22 @@ export class AuthApi {
 
   /** Update the current user's profile */
   static async updateUser(
-    userData: Partial<SignupRequest>
+    userData: Partial<SignupRequest>,
   ): Promise<AuthTokens> {
     const response = await apiClient.patch<AuthTokens>(
       "/api/v1/user/",
-      userData
+      userData,
     );
     return response.data;
   }
 
   /** Register a new user */
   static async registerUser(
-    registrationData: SignupRequest
+    registrationData: SignupRequest,
   ): Promise<AuthTokens> {
     const response = await apiClient.post<AuthTokens>(
       "/api/v1/user/register",
-      registrationData
+      registrationData,
     );
     return response.data;
   }
@@ -40,7 +39,7 @@ export class AuthApi {
   static async loginUser(loginData: LoginRequest): Promise<AuthTokens> {
     const response = await apiClient.post<AuthTokens>(
       "/api/v1/user/login",
-      loginData
+      loginData,
     );
     return response.data;
   }

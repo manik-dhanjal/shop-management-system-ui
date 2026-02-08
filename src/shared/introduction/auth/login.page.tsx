@@ -1,5 +1,4 @@
 import Button from "@shared/components/form/button.component";
-import TextBox from "@shared/components/form/text-box.component";
 import React, { useEffect, useMemo, useState } from "react";
 import loginImg from "@media/images/login.svg";
 import { Link, useNavigate } from "react-router-dom";
@@ -28,17 +27,17 @@ const LoginPage: React.FC = () => {
           .required("Email is required")
           .matches(
             /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
-            "Email is not valid"
+            "Email is not valid",
           ),
         password: yup
           .string()
           .required("Password is required")
           .min(6, "Password must be at least 6 characters"),
       }),
-    []
+    [],
   );
   const resolver = useYupValidationResolver(validationSchema);
-  const { control, handleSubmit, setValue } = useForm<LoginFormValues>({
+  const { control, handleSubmit } = useForm<LoginFormValues>({
     resolver,
     defaultValues: INITIAL_LOGIN_FORM_VALUES,
   });
@@ -54,7 +53,7 @@ const LoginPage: React.FC = () => {
       const user = await auth.login(data);
       globalAlert.addAlert(
         `Welcome back ${user.firstName} 🙏`,
-        AlertSeverity.SUCCESS
+        AlertSeverity.SUCCESS,
       );
       navigate("/dashboard/analytics");
     } catch (error) {

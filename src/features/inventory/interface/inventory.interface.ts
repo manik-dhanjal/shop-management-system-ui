@@ -29,10 +29,11 @@ export interface InventoryPopulated extends Omit<
 
 export interface AddInventory extends Omit<
   Inventory,
-  "_id" | "createdAt" | "updatedAt" | "__v" | "shop"
+  "_id" | "createdAt" | "updatedAt" | "__v" | "shop" | "supplier"
 > {
   _id?: string;
   shop: string;
+  supplier: string;
   createdAt?: string;
   updatedAt?: string;
 }

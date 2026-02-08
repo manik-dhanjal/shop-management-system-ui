@@ -1,7 +1,7 @@
 import { Button, CircularProgress, Modal } from "@mui/material";
 import { IoChevronDown, IoClose } from "react-icons/io5";
 import ProductSearchBar from "./product-search-bar.component";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ProductCard } from "./product-card.component";
 import { CategoryCard } from "./category-card.component";
 import { usePaginatedProducts } from "@features/product/hooks/use-get-paginated-products.hook";
