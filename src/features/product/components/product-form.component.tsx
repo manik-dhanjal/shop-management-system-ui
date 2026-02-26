@@ -203,23 +203,22 @@ export const ProductForm = ({
             required
           />
         </FormContainer>
-        <FormContainer title="Additional">
-          <KeywordInput
-            label="Keywords"
-            name="keywords"
-            value={formValues.keywords}
-            onChange={handleKeywordChange}
-            className="mb-5"
-          />
-          <TableInput
-            name="properties"
-            onChange={handleTableChange}
-            value={formValues.properties}
-            label="Properties"
-            header={{ name: "Name", value: "Value" }}
-            className="mb-5"
-          />
-        </FormContainer>
+
+        <KeywordInput
+          label="Keywords"
+          name="keywords"
+          value={formValues.keywords}
+          onChange={handleKeywordChange}
+          className="mb-5"
+        />
+        <TableInput
+          name="properties"
+          onChange={handleTableChange}
+          value={formValues.properties}
+          label="Properties"
+          header={{ name: "Name", value: "Value" }}
+          className="mb-5"
+        />
       </div>
       <div className="bg-slate-300 w-[1px] dark:bg-gray-800" />
       <div className="w-[330px]">
