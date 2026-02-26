@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { TextFieldControlled } from "@shared/components/form/text-field-controlled.component";
 import { PhoneFieldControlled } from "@shared/components/form/phone-field-controlled.component";
 import * as yup from "yup";
 import { CountrySelectControlled } from "@shared/components/form/country-select-controlled.component";
@@ -9,6 +8,7 @@ import UserImageUpload from "./user-image-upload.component";
 import { Image } from "@shared/interfaces/image.interface";
 import Button from "@mui/material/Button";
 import { User } from "../interface/user.interface";
+import TextFieldControlled from "@shared/components/form/text-field-controlled.component";
 
 export interface UserFormTypes {
   firstName: string;
@@ -73,10 +73,10 @@ const UserForm: React.FC<UserFormProps> = ({
           .required("Pin Code is required")
           .matches(/^\d{6}$/, "Pin Code should be exactly 6 digits"),
       }),
-    []
+    [],
   );
   const [profileImage, setProfileImage] = useState<Image | null>(
-    initialUserData?.profileImage || null
+    initialUserData?.profileImage || null,
   );
   const resolver = useYupValidationResolver(validationSchema);
   const { control, handleSubmit } = useForm<UserFormTypes>({

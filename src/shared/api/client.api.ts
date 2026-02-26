@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = process.env.API_URL || "http://localhost:3001";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export const apiClient = axios.create({
   baseURL: `${BASE_URL}`,
@@ -15,7 +15,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Add a response interceptor
@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
             headers: {
               Authorization: `Bearer ${refreshToken}`,
             },
-          }
+          },
         );
         const { token } = response.data;
 
@@ -54,5 +54,5 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
