@@ -33,7 +33,6 @@ export interface AddProduct extends Omit<
   updatedAt?: string;
 }
 
-export interface ProductFormType extends Omit<
-  Product,
-  "_id" | "createdAt" | "updatedAt" | "__v"
+export interface ProductFormType extends Partial<
+  Omit<Product, "_id" | "createdAt" | "updatedAt" | "__v">
 > {}

@@ -1,4 +1,7 @@
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useMemo } from "react";
+import * as yup from "yup";
+import { useYupValidationResolver } from "@shared/hooks/yup.hook";
 import { ProductFormType } from "@features/product/interfaces/product.interface";
 import { ProductProperty } from "@features/product/interfaces/product-property.interface";
 import TextFieldControlled from "../../../shared/components/form/text-field-controlled.component";
@@ -22,13 +25,13 @@ const INITIAL_PRODUCT_FORM: ProductFormType = {
   brand: "",
   keywords: [],
   properties: [],
-  price: 0,
+  price: undefined,
   currency: Currency.INR,
   measuringUnit: MeasuringUnit.PIECES,
-  stock: 0,
-  igstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
-  cgstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
-  sgstRate: 0, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
+  stock: undefined,
+  igstRate: undefined, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
+  cgstRate: undefined, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
+  sgstRate: undefined, //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
 };
 
 interface ProductFormProps {
@@ -42,8 +45,38 @@ export const ProductForm = ({
   initialFormValues = INITIAL_PRODUCT_FORM,
   onSubmit,
 }: ProductFormProps) => {
+  // build validation schema from server DTO rules
+  const validationSchema = useMemo(
+    () =>
+      yup.object().shape({
+        name: yup.string().max(100).required("Product name is required"),
+        description: yup.string().max(1000).nullable(),
+        sku: yup.string().max(50).required("SKU is required"),
+        images: yup.array().of(yup.string()),
+        hsn: yup.string().max(50).required("HSN code is required"),
+        brand: yup.string().max(100).required("Brand is required"),
+        keywords: yup.array().of(yup.string()).max(100),
+        properties: yup.array(),
+        igstRate: yup.number().required("IGST rate is required"),
+        cgstRate: yup.number().required("CGST rate is required"),
+        sgstRate: yup.number().required("SGST rate is required"),
+        stock: yup.number().min(0).required("Stock quantity is required"),
+        measuringUnit: yup
+          .mixed<MeasuringUnit>()
+          .oneOf(Object.values(MeasuringUnit))
+          .required("Measuring unit is required"),
+        price: yup.number().min(0).required("Price is required"),
+        currency: yup
+          .mixed<Currency>()
+          .oneOf(Object.values(Currency))
+          .required("Currency is required"),
+      }),
+    [],
+  );
+  const resolver = useYupValidationResolver(validationSchema);
   // react-hook-form used to control input elements.
   const { control, handleSubmit, watch, setValue } = useForm<ProductFormType>({
+    resolver,
     defaultValues: initialFormValues,
   });
 
@@ -207,14 +240,14 @@ export const ProductForm = ({
         <KeywordInput
           label="Keywords"
           name="keywords"
-          value={formValues.keywords}
+          value={formValues.keywords || []}
           onChange={handleKeywordChange}
           className="mb-5"
         />
         <TableInput
           name="properties"
           onChange={handleTableChange}
-          value={formValues.properties}
+          value={formValues.properties || []}
           label="Properties"
           header={{ name: "Name", value: "Value" }}
           className="mb-5"
@@ -228,7 +261,7 @@ export const ProductForm = ({
 
         <hr className="mb-6 mt-8 border-slate-300 dark:border-gray-800" />
         <ProductFeaturedImages
-          images={formValues.images}
+          images={formValues.images || []}
           onChange={handleImageChange}
         />
       </div>

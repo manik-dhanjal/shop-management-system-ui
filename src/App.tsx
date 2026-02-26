@@ -54,7 +54,6 @@ function App() {
           <Route path="shop">
             <Route path="add" element={<AddShopPage />} />
           </Route>
-          <Route path="inventory"></Route>
           <Route path="employee">
             <Route path="add" element={<AddEmployeePage />} />
             <Route path="all" element={<AllEmployeePage />} />
