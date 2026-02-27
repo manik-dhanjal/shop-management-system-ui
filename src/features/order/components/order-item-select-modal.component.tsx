@@ -4,6 +4,8 @@ import { usePaginatedProducts } from "@features/product/hooks/use-get-paginated-
 import { OrderItemPopulated } from "../interface/order-item.interface";
 import { Product } from "@features/product/interfaces/product.interface";
 import Button from "@shared/components/form/button.component";
+import CounterInput from "@shared/components/form/counter-input.component";
+import { TextField } from "@mui/material";
 
 const MAX_PRODUCTS_PER_LOAD = 10;
 
@@ -96,45 +98,46 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
   return (
     <Modal title="Select Products" onClose={close}>
       <div className="space-y-4">
-        <input
+        <TextField
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search products..."
-          className="w-full border rounded px-3 py-2"
+          className="w-full "
         />
         {isLoading && filtered.length === 0 ? (
           <div>Loading products...</div>
         ) : (
           <div
-            className="max-h-96 overflow-y-auto"
+            className="h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 dark:scrollbar-thumb-slate-300 scrollbar-track-slate-50 pr-1"
             ref={scrollContainerRef}
             onScroll={handleScroll}
           >
             <table className="table-auto w-full">
-              <thead className="text-xs font-semibold uppercase text-gray-400 bg-gray-50">
+              <thead className="text-xs font-semibold uppercase text-gray-400 bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="p-2 text-left">Name</th>
-                  <th className="p-2 text-left">Price</th>
-                  <th className="p-2 text-left">Qty</th>
+                  <th className="p-2 text-center w-5">Price</th>
+                  <th className="p-2 text-center">Stock</th>
+                  <th className="p-2 text-center  w-5">Qty</th>
                 </tr>
               </thead>
-              <tbody className="text-sm divide-y">
+              <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
                 {filtered.map((p, idx) => (
                   <tr key={p._id + idx + "product-for-selection"}>
                     <td className="p-2">{p.name}</td>
-                    <td className="p-2">
+                    <td className="p-2 text-center whitespace-nowrap">
                       {p.price} {p.currency ? p.currency.toUpperCase() : ""}
                     </td>
-                    <td className="p-2">
-                      <input
-                        type="number"
-                        min={0}
+                    <td className="p-2 text-center text-green-600">
+                      {p.stock}
+                    </td>
+                    <td className="p-2 flex justify-end">
+                      <CounterInput
                         value={quantities[p._id] || 0}
-                        onChange={(e) =>
-                          handleQtyChange(p._id, parseInt(e.target.value, 10))
-                        }
-                        className="w-20 border rounded px-1"
+                        onChange={(qty) => handleQtyChange(p._id, qty)}
+                        min={0}
+                        max={p.stock}
                       />
                     </td>
                   </tr>
