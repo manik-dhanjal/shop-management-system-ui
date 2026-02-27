@@ -1,233 +1,193 @@
 import { useForm, SubmitHandler } from "react-hook-form";
+import * as yup from "yup";
+import { useYupValidationResolver } from "@shared/hooks/yup.hook";
+import TextFieldControlled from "@shared/components/form/text-field-controlled.component";
+import { FormContainer } from "@shared/components/form-container.component";
+import { InvoiceType } from "@shared/enums/invoice-type.enum";
+import { PaymentMethod } from "@shared/enums/payment-method.enum";
+import { PaymentStatus } from "@shared/enums/payment-status.enum";
+import { OrderItemList } from "./order-item-list.component";
+import { OrderItemPopulated } from "../interface/order-item.interface";
+import { Button } from "@mui/material";
+import { OrderItemSelectModal } from "./order-item-select-modal.component";
+import { useState } from "react";
+import { Order } from "../interface/order.interface";
+import { BillingDetails } from "../interface/billing-details.interface";
+import { PaymentDetails } from "../interface/payment-details.interface";
 
-export interface OrderFormTypes {
-  // customer: string,
-  items: OrderItemFormTypes[];
-  description?: string;
-  gstTotal: number;
-  totalAmount: number;
-  paymentMethod: string;
-  paymentStatus: string;
-  // transactionId?: string;
-}
-
-export interface OrderItemFormTypes {
-  product: string;
-  quantity: number;
-  measuringUnit: string;
-  currency: string;
-  price: number;
-  discount?: number;
-  gstRate: number;
+export interface OrderFormTypes extends Partial<
+  Omit<
+    Order,
+    "billing" | "payment" | "shop" | "createdAt" | "updatedAt" | "__v" | "items"
+  >
+> {
+  billing: Partial<BillingDetails>;
+  payment: Partial<PaymentDetails>;
+  items: OrderItemPopulated[];
 }
 
 interface OrderFormProps {
   onSubmit: SubmitHandler<OrderFormTypes>;
   isLoading: boolean;
+  initialOrderData?: Partial<OrderFormTypes>;
 }
 
 export const INITIAL_FORM_VALUES: OrderFormTypes = {
+  invoiceId: undefined,
+  customer: undefined,
+  invoiceType: InvoiceType.TAX_INVOICE,
   items: [],
-  description: "",
-  gstTotal: 0,
-  totalAmount: 0,
-  paymentMethod: "",
-  paymentStatus: "",
+  description: undefined,
+  billing: {
+    subTotal: undefined,
+    discounts: undefined,
+    grandTotal: undefined,
+    roundOff: undefined,
+    finalAmount: undefined,
+  },
+  payment: {
+    paymentMethod: PaymentMethod.CASH,
+    status: undefined,
+    amountPaid: undefined,
+    paymentDate: new Date().toISOString(),
+  },
 };
 
-// const UserForm: React.FC<UserFormProps> = ({
-//   onSubmit,
-//   isLoading,
-//   initialUserData,
-// }: UserFormProps) => {
-//   const validationSchema = useMemo(
-//     () =>
-//       yup.object().shape({
-//         firstName: yup
-//           .string()
-//           .required("First Name is required")
-//           .matches(/^[a-zA-Z]+$/, "First Name should only contain letters"),
-//         lastName: yup
-//           .string()
-//           .required("Last Name is required")
-//           .matches(/^[a-zA-Z]+$/, "Last Name should only contain letters"),
-//         phone: yup.string().required("Phone number is required"),
-//         email: yup
-//           .string()
-//           .required("Email is required")
-//           .email("Email is not valid"),
-//         country: yup.string().required("Country is required"),
-//         address: yup.string().required("Address is required"),
-//         city: yup.string().required("City is required"),
-//         state: yup.string().required("State is required"),
-//         pinCode: yup
-//           .string()
-//           .required("Pin Code is required")
-//           .matches(/^\d{6}$/, "Pin Code should be exactly 6 digits"),
-//       }),
-//     []
-//   );
-//   const [profileImage, setProfileImage] = useState<Image | null>(
-//     initialUserData?.profileImage || null
-//   );
-//   const resolver = useYupValidationResolver(validationSchema);
-//   const { control, handleSubmit } = useForm<UserFormTypes>({
-//     resolver,
-//     defaultValues: initialUserData
-//       ? {
-//           firstName: initialUserData.firstName,
-//           lastName: initialUserData.lastName,
-//           phone: initialUserData.phone,
-//           email: initialUserData.email,
-//           country: initialUserData.location?.country,
-//           address: initialUserData.location?.address,
-//           city: initialUserData.location?.city,
-//           state: initialUserData.location?.state,
-//           pinCode: initialUserData.location?.pinCode,
-//         }
-//       : INITIAL_FORM_VALUES,
-//   });
+const schema = yup.object({
+  invoiceId: yup.string().required("Invoice id is required"),
+  customer: yup.string().required("Customer is required"),
+  invoiceType: yup
+    .mixed<InvoiceType>()
+    .oneOf(Object.values(InvoiceType))
+    .required("Invoice type is required"),
+  items: yup
+    .array()
+    .of(
+      yup.object({
+        name: yup.string().required("Product id is required"),
+        value: yup
+          .number()
+          .typeError("Quantity must be a number")
+          .min(0, "Quantity cannot be negative"),
+      }),
+    )
+    .min(1, "At least one item is required"),
+  description: yup.string(),
+  billing: yup.object({
+    subTotal: yup.number().required(),
+    discounts: yup.number().required(),
+    grandTotal: yup.number().required(),
+    roundOff: yup.number().required(),
+    finalAmount: yup.number().required(),
+  }),
+  payment: yup.object({
+    paymentMethod: yup
+      .mixed<PaymentMethod>()
+      .oneOf(Object.values(PaymentMethod))
+      .required("Payment method is required"),
+    status: yup
+      .mixed<PaymentStatus>()
+      .oneOf(Object.values(PaymentStatus))
+      .required("Payment status is required"),
+    amountPaid: yup.number().required("Amount paid is required"),
+    transactionId: yup.string(),
+    notes: yup.string(),
+    paymentDate: yup.string().required("Payment date is required"),
+  }),
+});
 
-//   const onFormSubmit = (data: UserFormTypes) => {
-//     if (profileImage) {
-//       onSubmit({ ...data, profileImage });
-//     } else {
-//       onSubmit({ ...data });
-//     }
-//   };
+export const OrderForm: React.FC<OrderFormProps> = ({
+  onSubmit,
+  initialOrderData,
+}) => {
+  const resolver = useYupValidationResolver(schema);
 
-//   return (
-//     <div className="flex gap-10 justify-center">
-//       <form
-//         onSubmit={handleSubmit(onFormSubmit)}
-//         className="flex gap-10 items-start"
-//       >
-//         {/* Left Side of Form , profile will be uploaded here*/}
-//         <div className="flex flex-col w-[360px]  dark:bg-gray-800 bg-white  rounded-xl ">
-//           <div className="px-6 py-4">
-//             <h2 className="text-md dark:text-gray-100 text-gray-900">
-//               Profile Image
-//             </h2>
-//           </div>
-//           <hr className=" dark:border-gray-600" />
-//           <div className="p-6">
-//             <UserImageUpload
-//               image={profileImage}
-//               onChange={(img) => setProfileImage(img)}
-//             />
-//           </div>
-//         </div>
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: {},
+  } = useForm<OrderFormTypes>({
+    defaultValues: initialOrderData || INITIAL_FORM_VALUES,
+    resolver,
+  });
 
-//         <div className="flex flex-col gap-10">
-//           {/* Right Side of Form */}
-//           <div className="w-max-[600px] dark:bg-gray-800 bg-white  rounded-xl">
-//             <div className="px-6 py-4">
-//               <h2 className="text-md dark:text-gray-100 text-gray-900">
-//                 Personal Details
-//               </h2>
-//             </div>
+  // bridge TableInput changes into react-hook-form
+  const itemsValue = watch("items");
+  const handleItemsChange = (updatedItems: OrderItemPopulated[]) => {
+    setValue("items", updatedItems);
+  };
+  const [isOrderItemSelectModalOpen, setOrderItemSelectModalOpen] =
+    useState(false);
+  return (
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
+        <div className="w-1/3">
+          <FormContainer title="Order Details" className="mb-6">
+            <TextFieldControlled
+              label="Invoice ID"
+              name="invoiceId"
+              control={control}
+              className="mb-5 w-full"
+              required
+            />
+            <TextFieldControlled
+              label="Customer"
+              name="customer"
+              control={control}
+              className="mb-5 w-full"
+              required
+            />
+          </FormContainer>
+          <FormContainer title="Billing Address" className="mb-6">
+            cd
+          </FormContainer>
+          <FormContainer title="Shipping Address" className="mb-6">
+            cd
+          </FormContainer>
+        </div>
+        <div className="w-2/3">
+          <div className="dark:bg-gray-800 bg-white  rounded-xl">
+            <div className="px-4 py-2 flex justify-between items-center">
+              <h2 className="text-sm dark:text-gray-100 text-gray-900">
+                Order Items
+              </h2>
+              <Button
+                variant="outlined"
+                size="small"
+                className="ml-auto"
+                onClick={() => setOrderItemSelectModalOpen(true)}
+              >
+                Add Item
+              </Button>
+            </div>
 
-//             <hr className=" dark:border-gray-600" />
-//             <div className="grid grid-cols-2 gap-y-8 gap-x-6 w-full p-6 ">
-//               <TextFieldControlled
-//                 name="firstName"
-//                 control={control}
-//                 label="First Name"
-//                 className="w-full"
-//                 placeholder="Enter your first name"
-//               />
-
-//               <TextFieldControlled
-//                 name="lastName"
-//                 control={control}
-//                 label="Last Name"
-//                 className="w-full"
-//                 placeholder="Enter your last name"
-//               />
-
-//               <PhoneFieldControlled
-//                 name="phone"
-//                 control={control}
-//                 label="Phone"
-//                 defaultCountry="IN"
-//                 className="w-full"
-//                 placeholder="Enter your phone number"
-//               />
-//               <TextFieldControlled
-//                 name="email"
-//                 control={control}
-//                 label="Email"
-//                 className="w-full"
-//                 placeholder="Enter your email"
-//               />
-//             </div>
-//           </div>
-
-//           {/* Right Side of Form */}
-//           <div className="w-max-[600px] dark:bg-gray-800 bg-white  rounded-xl">
-//             <div className="px-6 py-4">
-//               <h2 className="text-md dark:text-gray-100 text-gray-900">
-//                 Address
-//               </h2>
-//             </div>
-
-//             <hr className=" dark:border-gray-600" />
-//             <div className="flex gap-4 justify-stretch p-6 pt-6">
-//               <div className="grid grid-cols-2 gap-y-8 gap-x-6 w-full">
-//                 <TextFieldControlled
-//                   name="address"
-//                   control={control}
-//                   label="Address"
-//                   className="w-full col-span-2"
-//                   placeholder="Enter your address"
-//                 />
-
-//                 <TextFieldControlled
-//                   name="city"
-//                   control={control}
-//                   label="City"
-//                   className="w-full"
-//                   placeholder="Enter your city"
-//                 />
-//                 <TextFieldControlled
-//                   name="state"
-//                   control={control}
-//                   label="State"
-//                   className="w-full"
-//                   placeholder="Enter your state"
-//                 />
-
-//                 <CountrySelectControlled
-//                   name="country"
-//                   control={control}
-//                   label="Country"
-//                   defaultCountry="India"
-//                   className="w-full"
-//                 />
-//                 <TextFieldControlled
-//                   name="pinCode"
-//                   control={control}
-//                   label="Pincode"
-//                   className="w-full"
-//                   placeholder="Enter your pincode"
-//                 />
-//               </div>
-//             </div>
-//             <div className="flex justify-end mt-4 pb-6 px-6">
-//               <Button
-//                 variant="contained"
-//                 size="large"
-//                 type="submit"
-//                 disabled={isLoading}
-//               >
-//                 {isLoading ? "Submitting..." : "Submit"}
-//               </Button>
-//             </div>
-//           </div>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default UserForm;
+            <hr className=" dark:border-gray-600" />
+            <div className="w-full p-4">
+              <OrderItemList
+                orderItems={itemsValue}
+                handleChange={handleItemsChange}
+              />
+            </div>
+          </div>
+        </div>
+      </form>
+      {isOrderItemSelectModalOpen && (
+        <OrderItemSelectModal
+          close={() => setOrderItemSelectModalOpen(false)}
+          existingItems={itemsValue}
+          onAdd={(newItems) => {
+            // merge existing with newly selected items
+            handleItemsChange([
+              ...itemsValue,
+              ...newItems.filter(
+                (i) => !itemsValue.some((ei) => ei.product._id === i.product._id)
+              ),
+            ]);
+          }}
+        />
+      )}
+    </>
+  );
+};

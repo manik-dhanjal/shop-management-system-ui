@@ -19,8 +19,12 @@ import AllProductPage from "@pages/dashboard/product/all-products.page";
 import AddEmployeePage from "@pages/dashboard/employee/add-employee.page";
 import AllEmployeePage from "@pages/dashboard/employee/all-employee.page";
 import { EditEmployeePage } from "@pages/dashboard/employee/edit-employee.page";
-import { AddOrderPage } from "@pages/dashboard/order/add-order.page";
-import { AllOrdersPage } from "@pages/dashboard/order/all-orders.page";
+import AddOrderPage from "@pages/dashboard/order/add-order.page";
+import AllOrdersPage from "@pages/dashboard/order/all-orders.page";
+import { EditOrderPage } from "@pages/dashboard/order/edit-order.page";
+import { EditCustomerPage } from "@pages/dashboard/customer/edit-customer.page";
+import { AddCustomerPage } from "@pages/dashboard/customer/add-customer.page";
+import { AllCustomerPage } from "@pages/dashboard/customer/all-customer.page";
 
 function App() {
   const location = useLocation();
@@ -62,6 +66,12 @@ function App() {
           <Route path="order">
             <Route path="add" element={<AddOrderPage />} />
             <Route path="all" element={<AllOrdersPage />} />
+            <Route path=":orderId/edit" element={<EditOrderPage />} />
+          </Route>
+          <Route path="customer">
+            <Route path="add" element={<AddCustomerPage />} />
+            <Route path="all" element={<AllCustomerPage />} />
+            <Route path=":customerId/edit" element={<EditCustomerPage />} />
           </Route>
         </Route>
       </Routes>

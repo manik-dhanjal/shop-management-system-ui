@@ -1,16 +1,27 @@
-import { useAddOrder } from "@features/order/hooks/use-add-order.hook";
+import { CircularProgress } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   OrderForm,
   OrderFormTypes,
 } from "@features/order/components/order-form.component";
-import { CreateOrder } from "@features/order/interface/order.interface";
-import { InvoiceType } from "@shared/enums/invoice-type.enum";
+import { UpdateOrder } from "@features/order/interface/order.interface";
+import { useGetOrder } from "@features/order/hooks/use-get-order.hook";
+import { useUpdateOrder } from "@features/order/hooks/use-update-order.hook";
 import { useShop } from "@shared/hooks/shop.hook";
 import { OrderItem } from "@features/order/interface/order-item.interface";
 
-const AddOrderPage = () => {
-  const { mutate, isPending } = useAddOrder();
+export const EditOrderPage = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
   const { activeShop } = useShop();
+
+  if (!orderId) {
+    navigate("/404");
+    return;
+  }
+
+  const { mutate } = useUpdateOrder();
+  const existingOrder = useGetOrder(orderId);
 
   const handleSave = (order: OrderFormTypes) => {
     // Transform items from OrderItemPopulated to OrderItem
@@ -19,11 +30,8 @@ const AddOrderPage = () => {
       product: item.product._id,
     }));
 
-    const formattedOrder: CreateOrder = {
+    const formattedOrder: UpdateOrder = {
       ...order,
-      invoiceId: order.invoiceId || "",
-      customer: order.customer || "",
-      invoiceType: order.invoiceType || InvoiceType.TAX_INVOICE,
       items: transformedItems,
       shop: activeShop._id,
       billing: {
@@ -43,14 +51,29 @@ const AddOrderPage = () => {
         paymentDate: order.payment.paymentDate || new Date().toISOString(),
       },
     };
-    mutate(formattedOrder);
+    mutate({ orderId, orderChanges: formattedOrder });
   };
 
+  if (existingOrder.isLoading)
+    return (
+      <div className="flex flex-col gap-5 items-center justify-center">
+        <CircularProgress />
+        <div>Loading order details...</div>
+      </div>
+    );
+
+  if (!existingOrder.data || existingOrder.isError)
+    return (
+      <div className="flex flex-col gap-5 items-center justify-center">
+        <div>Unable to load order details</div>
+      </div>
+    );
+
   return (
-    <div>
-      <OrderForm onSubmit={handleSave} isLoading={isPending} />
-    </div>
+    <OrderForm
+      isLoading={existingOrder.isPending}
+      onSubmit={handleSave}
+      initialOrderData={existingOrder.data}
+    />
   );
 };
-
-export default AddOrderPage;

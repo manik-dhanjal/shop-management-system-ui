@@ -19,7 +19,7 @@ export interface Product {
   createdAt: string; // Date string
   updatedAt: string; // Date string
   price: number;
-  currency: Currency;
+  currency?: Currency;
   stock: number;
   measuringUnit: MeasuringUnit;
   __v: number;
