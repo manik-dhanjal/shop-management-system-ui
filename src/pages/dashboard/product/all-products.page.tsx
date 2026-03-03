@@ -33,7 +33,7 @@ const AllProductPage = () => {
   };
   const paginatedProducts = usePaginatedProducts(
     MAX_PRODUCTS_ON_SINGLE_PAGE,
-    currentPage
+    currentPage,
   );
   const { mutate } = useDeleteProduct();
 
@@ -89,7 +89,15 @@ const AllProductPage = () => {
                     <div className="font-semibold text-center">HSN</div>
                   </th>
                   <th className="p-2 whitespace-nowrap">
-                    <div className="font-semibold text-center">Created At</div>
+                    <div className="font-semibold text-center">
+                      Purchase Price
+                    </div>
+                  </th>
+                  <th className="p-2 whitespace-nowrap">
+                    <div className="font-semibold text-center">Sell Price</div>
+                  </th>
+                  <th className="p-2 whitespace-nowrap">
+                    <div className="font-semibold text-center">Stock</div>
                   </th>
                   <th className="p-2 whitespace-nowrap">
                     <div className="font-semibold text-center">Actions</div>
@@ -135,11 +143,20 @@ const AllProductPage = () => {
                         <div className="text-center">{product.hsn}</div>
                       </td>
                       <td className="p-2 whitespace-nowrap">
-                        {product.createdAt ? (
+                        <div className="text-center text-green-600">
+                          {product.purchasePrice}{" "}
+                          {product.currency?.toUpperCase()}
+                        </div>
+                      </td>
+                      <td className="p-2 whitespace-nowrap">
+                        <div className="text-center text-green-600">
+                          {product.sellPrice} {product.currency?.toUpperCase()}
+                        </div>
+                      </td>
+                      <td className="p-2 whitespace-nowrap">
+                        {product.stock ? (
                           <div className="text-center">
-                            {new Date(product.createdAt).toLocaleDateString()}
-                            {" - "}
-                            {new Date(product.createdAt).toLocaleTimeString()}
+                            {product.stock} {product.measuringUnit}
                           </div>
                         ) : (
                           <div className="text-center">-</div>

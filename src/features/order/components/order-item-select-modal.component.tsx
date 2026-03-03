@@ -88,7 +88,7 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
           discount: 0,
           taxableValue: 0,
           taxes: [],
-          totalPrice: prod.price * qty,
+          totalPrice: prod.sellPrice * qty,
         };
       });
     onAdd(items);
@@ -117,7 +117,7 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
               <thead className="text-xs font-semibold uppercase text-gray-400 bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="p-2 text-left">Name</th>
-                  <th className="p-2 text-center w-5">Price</th>
+                  <th className="p-2 text-center w-5">Sell Price</th>
                   <th className="p-2 text-center">Stock</th>
                   <th className="p-2 text-center  w-5">Qty</th>
                 </tr>
@@ -127,7 +127,7 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
                   <tr key={p._id + idx + "product-for-selection"}>
                     <td className="p-2">{p.name}</td>
                     <td className="p-2 text-center whitespace-nowrap">
-                      {p.price} {p.currency ? p.currency.toUpperCase() : ""}
+                      {p.sellPrice} {p.currency ? p.currency.toUpperCase() : ""}
                     </td>
                     <td className="p-2 text-center text-green-600">
                       {p.stock}

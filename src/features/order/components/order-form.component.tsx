@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { useYupValidationResolver } from "@shared/hooks/yup.hook";
 import TextFieldControlled from "@shared/components/form/text-field-controlled.component";
@@ -14,6 +14,10 @@ import { useState } from "react";
 import { Order } from "../interface/order.interface";
 import { BillingDetails } from "../interface/billing-details.interface";
 import { PaymentDetails } from "../interface/payment-details.interface";
+import {
+  CustomerSelect,
+  CustomerSelectControlled,
+} from "@features/customer/components/customer-select.component";
 
 export interface OrderFormTypes extends Partial<
   Omit<
@@ -124,7 +128,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
         <div className="w-1/3">
-          <FormContainer title="Order Details" className="mb-6">
+          <FormContainer title="Order Details" className="mb-4">
             <TextFieldControlled
               label="Invoice ID"
               name="invoiceId"
@@ -132,18 +136,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               className="mb-5 w-full"
               required
             />
-            <TextFieldControlled
-              label="Customer"
-              name="customer"
-              control={control}
-              className="mb-5 w-full"
-              required
-            />
+            <CustomerSelectControlled control={control} name="customer" />
           </FormContainer>
-          <FormContainer title="Billing Address" className="mb-6">
+          <FormContainer title="Billing Address" className="mb-4" collapsible>
             cd
           </FormContainer>
-          <FormContainer title="Shipping Address" className="mb-6">
+          <FormContainer title="Shipping Address" className="mb-4" collapsible>
             cd
           </FormContainer>
         </div>
@@ -182,7 +180,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             handleItemsChange([
               ...itemsValue,
               ...newItems.filter(
-                (i) => !itemsValue.some((ei) => ei.product._id === i.product._id)
+                (i) =>
+                  !itemsValue.some((ei) => ei.product._id === i.product._id),
               ),
             ]);
           }}

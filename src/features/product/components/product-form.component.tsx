@@ -25,7 +25,8 @@ const INITIAL_PRODUCT_FORM: ProductFormType = {
   brand: "",
   keywords: [],
   properties: [],
-  price: undefined,
+  purchasePrice: undefined,
+  sellPrice: undefined,
   currency: Currency.INR,
   measuringUnit: MeasuringUnit.PIECES,
   stock: undefined,
@@ -65,7 +66,11 @@ export const ProductForm = ({
           .mixed<MeasuringUnit>()
           .oneOf(Object.values(MeasuringUnit))
           .required("Measuring unit is required"),
-        price: yup.number().min(0).required("Price is required"),
+        purchasePrice: yup
+          .number()
+          .min(0)
+          .required("Purchase price is required"),
+        sellPrice: yup.number().min(0).required("Sell price is required"),
         currency: yup
           .mixed<Currency>()
           .oneOf(Object.values(Currency))
@@ -100,6 +105,7 @@ export const ProductForm = ({
   };
 
   const onFormSubmit: SubmitHandler<ProductFormType> = (data) => {
+    console.log("Form submitted with data:", data);
     onSubmit(data);
   };
   return (
@@ -185,8 +191,15 @@ export const ProductForm = ({
           childClassName="flex gap-5"
         >
           <TextFieldControlled
-            label="Price"
-            name="price"
+            label="Purchase Price"
+            name="purchasePrice"
+            control={control}
+            className="w-full"
+            required
+          />
+          <TextFieldControlled
+            label="Sell Price"
+            name="sellPrice"
             control={control}
             className="w-full"
             required

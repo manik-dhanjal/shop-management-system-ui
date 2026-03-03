@@ -56,7 +56,7 @@ export const OrderItemList: React.FC<OrderItemListProps> = ({
                   </td>
                   <td className="p-2 whitespace-nowrap">
                     <div className="text-center text-sm text-green-500">
-                      {item.product.price}{" "}
+                      {item.product.sellPrice}{" "}
                       {item.product.currency
                         ? item.product.currency.toUpperCase()
                         : ""}

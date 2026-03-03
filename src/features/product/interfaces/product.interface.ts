@@ -18,7 +18,9 @@ export interface Product {
   sgstRate: number; //Applicable IGST rate, e.g., 5%, 12%, 18%, 28%
   createdAt: string; // Date string
   updatedAt: string; // Date string
-  price: number;
+  shop: string;
+  purchasePrice: number;
+  sellPrice: number;
   currency?: Currency;
   stock: number;
   measuringUnit: MeasuringUnit;
@@ -27,12 +29,9 @@ export interface Product {
 
 export interface AddProduct extends Omit<
   Product,
-  "_id" | "createdAt" | "updatedAt" | "__v"
-> {
-  createdAt?: string;
-  updatedAt?: string;
-}
+  "_id" | "createdAt" | "updatedAt" | "__v" | "shop"
+> {}
 
 export interface ProductFormType extends Partial<
-  Omit<Product, "_id" | "createdAt" | "updatedAt" | "__v">
+  Omit<Product, "_id" | "createdAt" | "updatedAt" | "__v" | "shop">
 > {}
