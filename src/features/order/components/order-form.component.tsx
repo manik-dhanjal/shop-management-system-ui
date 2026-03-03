@@ -314,7 +314,7 @@ export const OrderForm = ({
               onOrderItemsChange={(newItems) => setOrderItems(newItems)}
             />
             <div className="flex gap-5 w-full items-start">
-              <OrderTaxes />
+              <OrderTaxes orderItems={orderItems} />
               <OrderSummary control={control} orderItems={orderItems} />
             </div>
           </div>
