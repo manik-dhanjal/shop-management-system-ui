@@ -8,6 +8,7 @@ import {
   CustomerPopulated,
 } from "@features/customer/interface/customer.interface";
 import { SearchableListCustomer } from "./searchable-list-customer.component";
+import { usePutCustomer } from "../hooks/use-put-customer.hook";
 
 interface CustomerSelectModalProps {
   close: () => void;
@@ -21,7 +22,7 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
   const [activeTab, setActiveTab] = useState<"search" | "add">("search");
 
   // Add customer mutation
-  const addCustomerMutation = useAddCustomer();
+  const putCustomerMutation = usePutCustomer();
 
   const handleCustomerSelect = (customer: CustomerPopulated) => {
     onCustomerSelect(customer);
@@ -29,8 +30,9 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
   };
 
   const handleAddCustomer = async (formData: CustomerFormTypes) => {
+    console.log(formData);
     try {
-      const a = await addCustomerMutation.mutateAsync({
+      const a = await putCustomerMutation.mutateAsync({
         name: formData.name,
         phone: formData.phone,
         email: formData.email,
@@ -84,13 +86,11 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
 
         {/* Add New Tab */}
         {activeTab === "add" && (
-          <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-            <CustomerForm
-              onSubmit={handleAddCustomer}
-              isLoading={addCustomerMutation.isPending}
-              initialCustomerData={INITIAL_FORM_VALUES}
-            />
-          </div>
+          <CustomerForm
+            onSubmit={handleAddCustomer}
+            isLoading={putCustomerMutation.isPending}
+            initialCustomerData={INITIAL_FORM_VALUES}
+          />
         )}
       </div>
     </Modal>

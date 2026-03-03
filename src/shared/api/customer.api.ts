@@ -58,6 +58,17 @@ export class CustomerApi {
     return response.data;
   }
 
+  static async putCustomer(
+    shopId: string,
+    payload: AddCustomer,
+  ): Promise<CustomerPopulated> {
+    const response = await apiClient.put(
+      `/api/v1/shop/${shopId}/customer`,
+      payload,
+    );
+    return response.data;
+  }
+
   static async deleteCustomer(
     shopId: string,
     customerId: string,
