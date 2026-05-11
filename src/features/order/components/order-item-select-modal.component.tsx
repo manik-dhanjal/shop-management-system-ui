@@ -6,6 +6,7 @@ import { Product } from "@features/product/interfaces/product.interface";
 import Button from "@shared/components/form/button.component";
 import CounterInput from "@shared/components/form/counter-input.component";
 import { TextField } from "@mui/material";
+import { TaxType } from "@shared/enums/tax-type.enum";
 
 const MAX_PRODUCTS_PER_LOAD = 10;
 
@@ -86,8 +87,26 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
           product: prod,
           quantity: qty,
           discount: 0,
-          taxableValue: 0,
-          taxes: [],
+          taxableValue:
+            prod.sellPrice * qty -
+            (prod.sellPrice * qty * (prod.igstRate || 0)) / 100,
+          taxes: [
+            {
+              type: TaxType.IGST,
+              rate: prod.igstRate || 0,
+              amount: (prod.sellPrice * qty * (prod.igstRate || 0)) / 100,
+            },
+            {
+              type: TaxType.CGST,
+              rate: prod.cgstRate || 0,
+              amount: (prod.sellPrice * qty * (prod.cgstRate || 0)) / 100,
+            },
+            {
+              type: TaxType.SGST,
+              rate: prod.sgstRate || 0,
+              amount: (prod.sellPrice * qty * (prod.sgstRate || 0)) / 100,
+            },
+          ],
           totalPrice: prod.sellPrice * qty,
         };
       });

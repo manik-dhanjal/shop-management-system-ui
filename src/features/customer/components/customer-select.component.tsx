@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MdOutlineArrowDropDown } from "react-icons/md";
 import { CustomerSelectModal } from "./customer-select-modal.component";
 import { Control, Controller } from "react-hook-form";
 import { useGetCustomer } from "../hooks/use-get-customer.hook";
-import { CustomerPopulated } from "../interface/customer.interface";
-import { UseQueryResult } from "@tanstack/react-query";
-import { MobileStepper } from "@mui/material";
 import { DotBounceLoading } from "@shared/components/dot-bounce-loading.component";
 
 interface CustomerSelectControllerProps {
@@ -84,10 +81,10 @@ export const CustomerSelect = ({
             <div className="text-m opacity-0">Customer</div>
           )}
         </div>
-        {error && helperText && (
-          <p className="text-red-600 text-sm mt-1">{helperText}</p>
-        )}
       </div>
+      {error && helperText && (
+        <p className="text-red-600 text-sm mt-1">{helperText}</p>
+      )}
       {isOpen && (
         <CustomerSelectModal
           close={() => setIsOpen(false)}

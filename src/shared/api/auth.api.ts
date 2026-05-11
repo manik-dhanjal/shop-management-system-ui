@@ -4,8 +4,7 @@ import {
   SignupRequest,
   AuthTokens,
 } from "@shared/interfaces/auth-context.interface";
-import { AddUser, User } from "@features/user/interface/user.interface";
-import { Pagination } from "@shared/interfaces/pagination.interface";
+import { User } from "@features/user/interface/user.interface";
 
 export class AuthApi {
   /** Fetch the current user's profile */

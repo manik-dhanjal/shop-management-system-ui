@@ -34,6 +34,15 @@ export const OrderItemList: React.FC<OrderItemListProps> = ({
                 <div className="font-semibold text-center">Unit Price</div>
               </th>
               <th className="p-2 whitespace-nowrap">
+                <div className="font-semibold text-center">SGST</div>
+              </th>
+              <th className="p-2 whitespace-nowrap">
+                <div className="font-semibold text-center">CGST</div>
+              </th>
+              <th className="p-2 whitespace-nowrap">
+                <div className="font-semibold text-center">IGST</div>
+              </th>
+              <th className="p-2 whitespace-nowrap">
                 <div className="font-semibold text-center">Total Price</div>
               </th>
               <th className="p-2 whitespace-nowrap">
@@ -50,16 +59,31 @@ export const OrderItemList: React.FC<OrderItemListProps> = ({
                     <div className="text-left">{item.product.name}</div>
                   </td>
                   <td className="p-2 whitespace-nowrap">
-                    <div className="text-center">
+                    <div className="text-center text-green-500">
                       {item.quantity} {item.product.measuringUnit}
                     </div>
                   </td>
                   <td className="p-2 whitespace-nowrap">
-                    <div className="text-center text-sm text-green-500">
+                    <div className="text-center text-sm ">
                       {item.product.sellPrice}{" "}
                       {item.product.currency
                         ? item.product.currency.toUpperCase()
                         : ""}
+                    </div>
+                  </td>
+                  <td className="p-2 whitespace-nowrap">
+                    <div className="text-center text-sm ">
+                      {item.product.sgstRate}%
+                    </div>
+                  </td>
+                  <td className="p-2 whitespace-nowrap">
+                    <div className="text-center text-sm ">
+                      {item.product.cgstRate}%
+                    </div>
+                  </td>
+                  <td className="p-2 whitespace-nowrap">
+                    <div className="text-center text-sm">
+                      {item.product.igstRate}%
                     </div>
                   </td>
                   <td className="p-2 whitespace-nowrap">

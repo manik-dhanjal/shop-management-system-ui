@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import Modal from "@shared/components/hoc/modal.component";
 import { CustomerForm, INITIAL_FORM_VALUES } from "./customer-form.component";
-import { useAddCustomer } from "@features/customer/hooks/use-add-customer.hook";
 import {
-  Customer,
   CustomerFormTypes,
   CustomerPopulated,
 } from "@features/customer/interface/customer.interface";

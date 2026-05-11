@@ -1,4 +1,5 @@
 import plugin from "tailwindcss/plugin";
+import scrollbar from "tailwind-scrollbar";
 
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
@@ -135,6 +136,6 @@ export default {
         );
       });
     }),
-    require("tailwind-scrollbar"),
+    scrollbar,
   ],
 };

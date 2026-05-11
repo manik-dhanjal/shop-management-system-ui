@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import * as yup from "yup";
 import { useYupValidationResolver } from "@shared/hooks/yup.hook";
 import TextFieldControlled from "@shared/components/form/text-field-controlled.component";
@@ -15,7 +15,6 @@ import { Order } from "../interface/order.interface";
 import { BillingDetails } from "../interface/billing-details.interface";
 import { PaymentDetails } from "../interface/payment-details.interface";
 import {
-  CustomerSelect,
   CustomerSelectControlled,
 } from "@features/customer/components/customer-select.component";
 
@@ -137,12 +136,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               required
             />
             <CustomerSelectControlled control={control} name="customer" />
-          </FormContainer>
-          <FormContainer title="Billing Address" className="mb-4" collapsible>
-            cd
-          </FormContainer>
-          <FormContainer title="Shipping Address" className="mb-4" collapsible>
-            cd
           </FormContainer>
         </div>
         <div className="w-2/3">

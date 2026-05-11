@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   FormApi,
-  DropdownOption,
   GetDropdownOptionsPayload,
 } from "@shared/api/form.api";
 import { useShop } from "@shared/hooks/shop.hook";

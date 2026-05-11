@@ -5,6 +5,13 @@ import viteTsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    host: true,
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
+  },
   define: {
     "process.env": process.env,
   },

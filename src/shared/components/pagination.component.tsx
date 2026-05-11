@@ -1,4 +1,3 @@
-import React from 'react';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 export interface PaginationType {
 	totalPages: number;

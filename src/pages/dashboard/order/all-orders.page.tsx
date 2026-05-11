@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Order } from "@features/order/interface/order.interface";
 import { useNavigate } from "react-router-dom";
 import { useGetPaginatedOrders } from "@features/order/hooks/use-get-paginated-orders.hook";
 import { useDeleteOrder } from "@features/order/hooks/use-delete-order.hook";
@@ -8,6 +7,7 @@ import { Pagination } from "@shared/components/pagination.component";
 import { IoPencil, IoTrash } from "react-icons/io5";
 import { IoCopy } from "react-icons/io5";
 import Modal from "@shared/components/hoc/modal.component";
+import { Order } from "@features/order/interface/order.interface";
 
 const MAX_ORDERS_ON_SINGLE_PAGE = 10;
 
