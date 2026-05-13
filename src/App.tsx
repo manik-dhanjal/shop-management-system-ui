@@ -26,6 +26,7 @@ import PrintOrderPage from "@pages/dashboard/order/print-order.page";
 import { EditCustomerPage } from "@pages/dashboard/customer/edit-customer.page";
 import { AddCustomerPage } from "@pages/dashboard/customer/add-customer.page";
 import { AllCustomerPage } from "@pages/dashboard/customer/all-customer.page";
+import { CustomerDetailPage } from "@pages/dashboard/customer/customer-detail.page";
 
 function App() {
   const location = useLocation();
@@ -73,6 +74,7 @@ function App() {
           <Route path="customer">
             <Route path="add" element={<AddCustomerPage />} />
             <Route path="all" element={<AllCustomerPage />} />
+            <Route path=":customerId" element={<CustomerDetailPage />} />
             <Route path=":customerId/edit" element={<EditCustomerPage />} />
           </Route>
         </Route>
