@@ -4,7 +4,7 @@ import { useGetPaginatedOrders } from "@features/order/hooks/use-get-paginated-o
 import { useDeleteOrder } from "@features/order/hooks/use-delete-order.hook";
 import { Button, CircularProgress } from "@mui/material";
 import { Pagination } from "@shared/components/pagination.component";
-import { IoPencil, IoTrash } from "react-icons/io5";
+import { IoPencil, IoTrash, IoPrint } from "react-icons/io5";
 import { IoCopy } from "react-icons/io5";
 import Modal from "@shared/components/hoc/modal.component";
 import { Order } from "@features/order/interface/order.interface";
@@ -105,7 +105,13 @@ function AllOrdersPage() {
                     </td>
                     <td className="p-2 whitespace-nowrap">
                       <div className="text-left text-gray-800 dark:text-gray-100">
-                        {order.customer}
+                        {typeof order.customer === "object" &&
+                        order.customer !== null
+                          ? (order.customer as { name?: string; phone?: string })
+                              .name ||
+                            (order.customer as { phone?: string }).phone ||
+                            "—"
+                          : order.customer || "—"}
                       </div>
                     </td>
                     <td className="p-2 whitespace-nowrap">
@@ -129,6 +135,14 @@ function AllOrdersPage() {
                     </td>
                     <td className="p-2 whitespace-nowrap">
                       <div className="text-xl flex justify-center gap-3 text-gray-800 dark:text-gray-100">
+                        <button
+                          onClick={() =>
+                            navigate(`/dashboard/order/${order._id}/print`)
+                          }
+                          aria-label="Print invoice"
+                        >
+                          <IoPrint />
+                        </button>
                         <button onClick={() => handleOrderEdit(order._id)}>
                           <IoPencil />
                         </button>

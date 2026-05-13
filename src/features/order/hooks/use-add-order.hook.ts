@@ -6,12 +6,10 @@ import { CreateOrder } from "../interface/order.interface";
 import { OrderApi } from "@shared/api/order.api";
 import { AxiosError } from "axios";
 import { isArray } from "lodash";
-import { useNavigate } from "react-router-dom";
 
 export const useAddOrder = () => {
   const { activeShop } = useShop();
   const { addAlert } = useAlert();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (newOrder: CreateOrder) => {
@@ -25,11 +23,13 @@ export const useAddOrder = () => {
       queryClient.invalidateQueries({
         queryKey: [activeShop._id, "orders", "paginated"],
       });
+      queryClient.invalidateQueries({
+        queryKey: [activeShop._id, "order", "invoice-id", "preview"],
+      });
       addAlert(
         `Order ${createdOrder.invoiceId} created successfully! 🎉`,
         AlertSeverity.SUCCESS,
       );
-      navigate("/dashboard/order/all");
     },
     onError: (error) => {
       if (error instanceof AxiosError && error.response?.data.message) {

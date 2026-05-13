@@ -41,6 +41,16 @@ export class OrderApi {
     return response.data;
   }
 
+  static async getOrderPopulated(
+    shopId: string,
+    orderId: string,
+  ): Promise<Order> {
+    const response = await apiClient.get(
+      `/api/v1/shop/${shopId}/order/${orderId}/populated`,
+    );
+    return response.data;
+  }
+
   static async updateOrder(
     shopId: string,
     orderId: string,

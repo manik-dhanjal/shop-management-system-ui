@@ -142,7 +142,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
         <div>
           {/* Customer Details */}
           <TextFieldControlled
-            label="Customer Name *"
+            label="Customer Name"
             name="name"
             control={control}
             className="mb-5 w-full"

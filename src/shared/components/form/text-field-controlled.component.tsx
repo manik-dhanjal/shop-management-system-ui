@@ -9,8 +9,8 @@ type TextFieldControlledProps = TextFieldProps & {
 export const TextFieldControlled = ({
   name,
   control,
-  required,
   className,
+  slotProps,
   ...props
 }: TextFieldControlledProps) => {
   // apply any tailwind/utility classes to a wrapper div instead of the
@@ -32,14 +32,20 @@ export const TextFieldControlled = ({
           return (
             <MuiTextField
               {...field}
+              // Coerce undefined → "" so React doesn't flip the input from
+              // uncontrolled to controlled when the form value first appears
+              // (happens for any field whose initial value is undefined).
+              value={field.value ?? ""}
               {...restProps}
               onChange={handleChange}
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
               className="w-full"
               slotProps={{
+                ...slotProps,
                 input: {
                   style: { borderRadius: "8px", width: "100%" },
+                  ...(slotProps?.input as object),
                 },
               }}
             />

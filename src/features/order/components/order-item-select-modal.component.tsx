@@ -6,7 +6,6 @@ import { Product } from "@features/product/interfaces/product.interface";
 import Button from "@shared/components/form/button.component";
 import CounterInput from "@shared/components/form/counter-input.component";
 import { TextField } from "@mui/material";
-import { TaxType } from "@shared/enums/tax-type.enum";
 
 const MAX_PRODUCTS_PER_LOAD = 10;
 
@@ -79,7 +78,11 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
   };
 
   const handleAddClick = () => {
-    const items: OrderItemPopulated[] = Object.entries(quantities)
+    // Insert lines with zero tax/total — the form's pricing util fills these in
+    // based on customer state + invoice type. This keeps tax math in one place.
+    const items: OrderItemPopulated[] = (
+      Object.entries(quantities) as [string, number][]
+    )
       .filter(([, qty]) => qty > 0)
       .map(([id, qty]) => {
         const prod = products.find((p) => p._id === id)!;
@@ -87,26 +90,8 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
           product: prod,
           quantity: qty,
           discount: 0,
-          taxableValue:
-            prod.sellPrice * qty -
-            (prod.sellPrice * qty * (prod.igstRate || 0)) / 100,
-          taxes: [
-            {
-              type: TaxType.IGST,
-              rate: prod.igstRate || 0,
-              amount: (prod.sellPrice * qty * (prod.igstRate || 0)) / 100,
-            },
-            {
-              type: TaxType.CGST,
-              rate: prod.cgstRate || 0,
-              amount: (prod.sellPrice * qty * (prod.cgstRate || 0)) / 100,
-            },
-            {
-              type: TaxType.SGST,
-              rate: prod.sgstRate || 0,
-              amount: (prod.sellPrice * qty * (prod.sgstRate || 0)) / 100,
-            },
-          ],
+          taxableValue: prod.sellPrice * qty,
+          taxes: [],
           totalPrice: prod.sellPrice * qty,
         };
       });

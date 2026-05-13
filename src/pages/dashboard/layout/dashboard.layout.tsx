@@ -38,23 +38,27 @@ function DashboardLayout() {
 
 	return (
 		<ShopProvider activeShop={auth.activeShop}>
-			<div className="flex h-screen overflow-hidden">
-				{/* Sidebar */}
-				<DashboardSidebar
-					sidebarOpen={sidebarOpen}
-					setSidebarOpen={setSidebarOpen}
-				/>
-
-				{/* Content area */}
-				<div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-					{/*  Site header */}
-					<DashboardHeader
+			<div className="flex h-screen overflow-hidden print:block print:h-auto print:overflow-visible">
+				{/* Sidebar — hidden when printing so the invoice prints clean */}
+				<div className="print:hidden">
+					<DashboardSidebar
 						sidebarOpen={sidebarOpen}
 						setSidebarOpen={setSidebarOpen}
 					/>
+				</div>
+
+				{/* Content area */}
+				<div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden print:overflow-visible">
+					{/*  Site header — also hidden when printing */}
+					<div className="print:hidden">
+						<DashboardHeader
+							sidebarOpen={sidebarOpen}
+							setSidebarOpen={setSidebarOpen}
+						/>
+					</div>
 
 					<main className="grow">
-						<div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+						<div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto print:p-0 print:max-w-none">
 							<Outlet />
 						</div>
 					</main>

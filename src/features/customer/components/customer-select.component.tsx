@@ -51,35 +51,38 @@ export const CustomerSelect = ({
 
   const customer = useGetCustomer(value);
 
+  const floated = !!(customer.data || customer.isLoading);
+
   return (
     <>
-      <div className={className + " relative"}>
+      <div className={(className || "") + " relative"}>
         <div
-          className="p-4 dark:bg-gray-800 border border-black/25 dark:border-white/25 dark:text-white rounded-lg cursor-pointer pr-4 hover:border-black dark:hover:border-white z-0"
+          className={`relative h-14 px-3.5 flex items-center bg-transparent dark:bg-gray-800 border border-black/[0.23] dark:border-white/[0.23] dark:text-white rounded-lg cursor-pointer hover:border-black dark:hover:border-white ${
+            error ? "border-red-500 dark:border-red-500" : ""
+          }`}
           onClick={() => setIsOpen(true)}
         >
-          <div className="flex justify-between items-center">
-            <div
-              className={`text-m dark:text-white/70 text-black/60 dark:bg-gray-800  z-100 transition-all absolute   translate-y-[-50%] ${customer.data || customer.isLoading ? " top-[0] left-1 scale-[85%] bg-white px-[5px]" : "left-3 top-[50%] bg-transparent"}`}
-            >
-              Customer
-            </div>
-            <MdOutlineArrowDropDown className="text-2xl text-dark/55 dark:text-white absolute right-2 top-[50%] translate-y-[-50%]" />
-          </div>
-          {customer.isLoading ? (
-            <DotBounceLoading className="py-[9px]" size="w-1" />
-          ) : customer.data ? (
-            <>
-              <div className="font-medium text-gray-900 dark:text-gray-50">
+          <span
+            className={`pointer-events-none absolute z-10 transition-all dark:text-white/70 text-black/60 ${
+              floated
+                ? "top-0 left-2 -translate-y-1/2 text-xs px-1 bg-white dark:bg-gray-800"
+                : "left-3 top-1/2 -translate-y-1/2 text-base"
+            } ${error ? "text-red-500" : ""}`}
+          >
+            Customer
+          </span>
+
+          <div className="flex-1 min-w-0 pr-8">
+            {customer.isLoading ? (
+              <DotBounceLoading className="py-[9px]" size="w-1" />
+            ) : customer.data ? (
+              <div className="truncate font-medium text-gray-900 dark:text-gray-50">
                 {customer.data.name}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {customer.data.phone}
-              </div>
-            </>
-          ) : (
-            <div className="text-m opacity-0">Customer</div>
-          )}
+            ) : null}
+          </div>
+
+          <MdOutlineArrowDropDown className="text-2xl text-dark/55 dark:text-white absolute right-2 top-1/2 -translate-y-1/2" />
         </div>
       </div>
       {error && helperText && (
