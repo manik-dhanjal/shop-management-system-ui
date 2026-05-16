@@ -429,6 +429,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
                         name={`contactPersons.${index}.phone`}
                         control={control}
                         defaultCountry="IN"
+                        className="w-full"
                       />
                       <TextFieldControlled
                         label="Email"

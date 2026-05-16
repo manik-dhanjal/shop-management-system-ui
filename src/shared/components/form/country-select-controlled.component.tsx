@@ -40,7 +40,7 @@ const useStyles = makeStyles({
 });
 
 export const getCountryByLabel = (
-  label: string | undefined | null
+  label: string | undefined | null,
 ): CountryType | null => {
   return countries.find((country) => country.label === label) || null;
 };
@@ -128,6 +128,7 @@ export default function CountrySelect({
               ...params.inputProps,
               style: {
                 borderRadius: "8px",
+                width: "100%",
               },
               autoComplete: "new-password", // disable autocomplete and autofill
             },

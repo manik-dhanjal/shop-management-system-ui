@@ -107,7 +107,12 @@ export const OrderItemSelectModal: React.FC<OrderItemSelectModalProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search products..."
-          className="w-full "
+          className="w-full"
+          slotProps={{
+            input: {
+              style: { borderRadius: "8px", width: "100%" },
+            },
+          }}
         />
         {isLoading && filtered.length === 0 ? (
           <div>Loading products...</div>

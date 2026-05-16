@@ -66,4 +66,15 @@ export class OrderApi {
   static async deleteOrder(shopId: string, orderId: string): Promise<void> {
     await apiClient.delete(`/api/v1/shop/${shopId}/order/${orderId}`);
   }
+
+  static async getOrderStats(shopId: string): Promise<{
+    totalOrders: number;
+    totalBilled: number;
+    totalPaid: number;
+    outstanding: number;
+    avgOrderValue: number;
+  }> {
+    const response = await apiClient.get(`/api/v1/shop/${shopId}/order/stats`);
+    return response.data;
+  }
 }

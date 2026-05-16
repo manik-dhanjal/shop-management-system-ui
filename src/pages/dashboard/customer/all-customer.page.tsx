@@ -75,12 +75,7 @@ const AllCustomerPage = () => {
     return Object.keys(f).length ? f : undefined;
   }, [statusFilter, typeFilter]);
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isError,
-  } = usePaginatedCustomers(
+  const { data, isLoading, isFetching, isError } = usePaginatedCustomers(
     MAX_PER_PAGE,
     page,
     debouncedSearch || undefined,
@@ -147,6 +142,7 @@ const AllCustomerPage = () => {
           }}
           slotProps={{
             input: {
+              style: { borderRadius: "8px", width: "100%" },
               startAdornment: (
                 <InputAdornment position="start">
                   <IoSearch className="text-gray-400" />
@@ -172,6 +168,11 @@ const AllCustomerPage = () => {
             setStatusFilter(e.target.value as CustomerStatus | "");
             setPage(1);
           }}
+          slotProps={{
+            input: {
+              style: { borderRadius: "8px", width: "100%" },
+            },
+          }}
           className="min-w-[140px]"
           sx={{ minWidth: 140 }}
         >
@@ -190,6 +191,11 @@ const AllCustomerPage = () => {
           onChange={(e) => {
             setTypeFilter(e.target.value as CustomerType | "");
             setPage(1);
+          }}
+          slotProps={{
+            input: {
+              style: { borderRadius: "8px", width: "100%" },
+            },
           }}
           className="min-w-[140px]"
           sx={{ minWidth: 140 }}

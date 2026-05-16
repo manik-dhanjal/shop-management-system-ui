@@ -144,6 +144,7 @@ export default function AsyncDropdown({
               ...params.inputProps,
               style: {
                 borderRadius: "8px",
+                width: "100%",
               },
               autoComplete: "new-password", // disable autocomplete and autofill
             },

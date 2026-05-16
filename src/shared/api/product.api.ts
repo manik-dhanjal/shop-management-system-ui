@@ -9,7 +9,7 @@ import { omit as _omit } from "lodash";
 export class ProductApi {
   static async createProduct(
     shopId: string,
-    product: AddProduct
+    product: AddProduct,
   ): Promise<Product> {
     const response = await apiClient.post(`/api/v1/shop/${shopId}/product`, {
       ...product,
@@ -22,7 +22,7 @@ export class ProductApi {
     limit: number,
     page: number,
     filter?: Partial<AddProduct>,
-    sort?: Record<keyof AddProduct, string>
+    sort?: Record<keyof AddProduct, string>,
   ): Promise<Pagination<Product>> {
     const response = await apiClient.post(
       `/api/v1/shop/${shopId}/product/paginated`,
@@ -31,7 +31,7 @@ export class ProductApi {
         page,
         filter,
         sort,
-      }
+      },
     );
     return response.data;
   }
@@ -39,9 +39,21 @@ export class ProductApi {
     await apiClient.delete(`/api/v1/shop/${shopId}/product/${productId}`);
   }
 
+  static async getProductStats(shopId: string): Promise<{
+    totalProducts: number;
+    totalStock: number;
+    outOfStockCount: number;
+    totalInventoryValue: number;
+  }> {
+    const response = await apiClient.get(
+      `/api/v1/shop/${shopId}/product/stats`,
+    );
+    return response.data;
+  }
+
   static async getProduct(shopId: string, productId: string): Promise<Product> {
     const response = await apiClient.get(
-      `/api/v1/shop/${shopId}/product/${productId}`
+      `/api/v1/shop/${shopId}/product/${productId}`,
     );
     return response.data;
   }
@@ -49,7 +61,7 @@ export class ProductApi {
   static async updateProduct(
     shopId: string,
     productId: string,
-    product: Partial<Product>
+    product: Partial<Product>,
   ): Promise<Product> {
     let productPayload: Partial<Omit<Product, "images"> & { images: string[] }>;
     if (product.images) {
@@ -62,7 +74,7 @@ export class ProductApi {
     }
     const response = await apiClient.patch(
       `/api/v1/shop/${shopId}/product/${productId}`,
-      productPayload
+      productPayload,
     );
     return response.data;
   }
