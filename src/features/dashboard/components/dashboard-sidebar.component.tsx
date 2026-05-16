@@ -300,7 +300,7 @@ function Sidebar({
                               }
                             >
                               <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                My Products
+                                All Products
                               </span>
                             </NavLink>
                           </li>
@@ -552,16 +552,14 @@ function Sidebar({
             </h3>
             <ul className="mt-3">
               {/* Suppliers */}
-              <SidebarLinkGroup
-                activecondition={pathname.includes("suppliers")}
-              >
+              <SidebarLinkGroup activecondition={pathname.includes("supplier")}>
                 {(handleClick: () => void, open: boolean) => {
                   return (
                     <React.Fragment>
                       <a
                         href="#0"
                         className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
-                          pathname.includes("suppliers")
+                          pathname.includes("supplier")
                             ? ""
                             : "hover:text-gray-900 dark:hover:text-white"
                         }`}
@@ -575,7 +573,7 @@ function Sidebar({
                           <div className="flex items-center">
                             <FaTruckRampBox
                               className={`shrink-0 fill-current text-lg ${
-                                pathname.includes("suppliers")
+                                pathname.includes("supplier")
                                   ? "text-violet-500"
                                   : "text-gray-400 dark:text-gray-500"
                               }`}
@@ -602,7 +600,7 @@ function Sidebar({
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
-                              to="suppliers"
+                              to="supplier/all"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
                                 (isActive
@@ -618,7 +616,7 @@ function Sidebar({
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
-                              to="suppliers"
+                              to="supplier/add"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
                                 (isActive

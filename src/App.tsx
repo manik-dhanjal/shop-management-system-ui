@@ -27,6 +27,10 @@ import { EditCustomerPage } from "@pages/dashboard/customer/edit-customer.page";
 import { AddCustomerPage } from "@pages/dashboard/customer/add-customer.page";
 import { AllCustomerPage } from "@pages/dashboard/customer/all-customer.page";
 import { CustomerDetailPage } from "@pages/dashboard/customer/customer-detail.page";
+import { AllSupplierPage } from "@pages/dashboard/supplier/all-supplier.page";
+import { AddSupplierPage } from "@pages/dashboard/supplier/add-supplier.page";
+import { SupplierDetailPage } from "@pages/dashboard/supplier/supplier-detail.page";
+import { EditSupplierPage } from "@pages/dashboard/supplier/edit-supplier.page";
 
 function App() {
   const location = useLocation();
@@ -76,6 +80,12 @@ function App() {
             <Route path="all" element={<AllCustomerPage />} />
             <Route path=":customerId" element={<CustomerDetailPage />} />
             <Route path=":customerId/edit" element={<EditCustomerPage />} />
+          </Route>
+          <Route path="supplier">
+            <Route path="add" element={<AddSupplierPage />} />
+            <Route path="all" element={<AllSupplierPage />} />
+            <Route path=":supplierId" element={<SupplierDetailPage />} />
+            <Route path=":supplierId/edit" element={<EditSupplierPage />} />
           </Route>
         </Route>
       </Routes>

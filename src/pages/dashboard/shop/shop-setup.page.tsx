@@ -17,7 +17,6 @@ const INITIAL_SHOP_FORM_VALUES: ShopFormType = {
 		pinCode: '',
 	},
 	gstin: '',
-	suppliers: [],
 };
 
 const TOTAL_STEPS = 3;

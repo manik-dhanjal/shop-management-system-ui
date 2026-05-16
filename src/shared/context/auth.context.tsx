@@ -16,7 +16,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
-	const [activeShop, setActiveShop] = useState<Shop<string> | null>(null);
+	const [activeShop, setActiveShop] = useState<Shop | null>(null);
 
 	const login = async (credentials: LoginRequest): Promise<User> => {
 		try {

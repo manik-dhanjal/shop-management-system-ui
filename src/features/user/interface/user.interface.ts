@@ -25,6 +25,6 @@ export interface User {
 }
 
 export interface ShopMeta {
-  shop: Shop<string>;
+  shop: Shop;
   roles: string[];
 }

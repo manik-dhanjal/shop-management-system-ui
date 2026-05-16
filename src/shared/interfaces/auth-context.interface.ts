@@ -14,7 +14,7 @@ export interface SignupRequest {
 
 export interface AuthContextType {
   user: User | null;
-  activeShop: Shop<string> | null;
+  activeShop: Shop | null;
   setActiveShop: (shopId: string) => boolean;
   refreshUser: () => Promise<void>;
   login: (credentials: LoginRequest) => Promise<User>;
