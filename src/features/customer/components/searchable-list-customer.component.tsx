@@ -77,14 +77,14 @@ export const SearchableListCustomer = ({
       />
 
       {isSearching ? (
-        <div className="p-4 text-center text-gray-500 flex justify-center h-[calc(100vh-250px)] items-center">
+        <div className="p-4 text-center text-gray-500 flex justify-center h-[55vh] items-center">
           <DotBounceLoading size="w-2" />
         </div>
       ) : allCustomers.length > 0 ? (
         <div
           ref={scrollContainerRef}
           id="scrollable-customer-list"
-          className="h-[calc(100vh-250px)] border border-gray-200 dark:border-gray-700 rounded-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800"
+          className="h-[55vh] border border-gray-200 dark:border-gray-700 rounded-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800"
         >
           <InfiniteScroll
             dataLength={allCustomers.length}
@@ -122,7 +122,7 @@ export const SearchableListCustomer = ({
           </InfiniteScroll>
         </div>
       ) : (
-        <div className="p-4 text-center text-gray-500 h-[calc(100vh-250px)] flex items-center justify-center">
+        <div className="p-4 text-center text-gray-500 h-[55vh] flex items-center justify-center">
           {searchTerm
             ? "No customers found"
             : "Enter search term to find customers"}

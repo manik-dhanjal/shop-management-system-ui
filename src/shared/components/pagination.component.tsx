@@ -83,6 +83,7 @@ export const Pagination = ({
 				)}
 				{pagesToShow.map((index) => (
 					<PgBtn
+						key={`pag-btn-${index}`}
 						index={index}
 						activePage={activePage}
 						handleClick={handleClick}
@@ -126,7 +127,6 @@ const PgBtn = ({
 	return (
 		<button
 			onClick={() => handleClick(index)}
-			key={'pag-btn' + index}
 			className={` w-8 h-8 flex justify-center items-center transition rounded-lg ${
 				index === activePage && 'bg-violet-400 text-white '
 			}`}

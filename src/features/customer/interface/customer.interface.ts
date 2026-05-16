@@ -6,6 +6,13 @@ import { GstRegistrationType } from "@shared/enums/gst-registration-type.enum";
 import { PaymentTerms } from "@shared/enums/payment-terms.enum";
 import { CustomerSource } from "@shared/enums/customer-source.enum";
 
+export interface ContactPerson {
+  name: string;
+  designation?: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface CustomerStats {
   totalOrders: number;
   totalBilled: number;
@@ -33,6 +40,7 @@ export interface Customer {
   alternateEmails?: string[];
   contactPersonName?: string;
   contactPersonDesignation?: string;
+  contactPersons?: ContactPerson[];
   profileImage?: string;
 
   // GST & tax

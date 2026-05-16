@@ -23,6 +23,7 @@ export class CustomerApi {
     page: number,
     search?: string,
     sort?: Record<string, string>,
+    filter?: Record<string, unknown>,
   ): Promise<Pagination<CustomerPopulated>> {
     const response = await apiClient.post(
       `/api/v1/shop/${shopId}/customer/paginated`,
@@ -31,7 +32,20 @@ export class CustomerApi {
         page,
         search,
         sort,
+        filter,
       },
+    );
+    return response.data;
+  }
+
+  static async getCustomerStats(shopId: string): Promise<{
+    totalCustomers: number;
+    activeCustomers: number;
+    withGstin: number;
+    totalOutstanding: number;
+  }> {
+    const response = await apiClient.get(
+      `/api/v1/shop/${shopId}/customer/stats`,
     );
     return response.data;
   }

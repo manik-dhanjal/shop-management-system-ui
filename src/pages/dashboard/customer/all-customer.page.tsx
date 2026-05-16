@@ -4,19 +4,23 @@ import {
   Button,
   CircularProgress,
   InputAdornment,
+  LinearProgress,
   MenuItem,
   TextField,
 } from "@mui/material";
 import { IoPencil, IoTrash, IoSearch } from "react-icons/io5";
 import Modal from "@shared/components/hoc/modal.component";
 import { Pagination } from "@shared/components/pagination.component";
+import { useDebouncedValue } from "@shared/hooks/use-debounced-value.hook";
 import { usePaginatedCustomers } from "@features/customer/hooks/use-get-paginated-customers.hook";
+import { useCustomerStats } from "@features/customer/hooks/use-customer-stats.hook";
 import { useDeleteCustomer } from "@features/customer/hooks/use-delete-customer.hook";
 import { CustomerStatus } from "@shared/enums/customer-status.enum";
 import { CustomerType } from "@shared/enums/customer-type.enum";
 import { CustomerPopulated } from "@features/customer/interface/customer.interface";
 
 const MAX_PER_PAGE = 10;
+const SEARCH_DEBOUNCE_MS = 400;
 
 const money = (n: number | undefined) =>
   `₹${(n ?? 0).toLocaleString("en-IN", {
@@ -56,39 +60,37 @@ const statusBadge = (status?: CustomerStatus) => {
 const AllCustomerPage = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState<CustomerStatus | "">("");
   const [typeFilter, setTypeFilter] = useState<CustomerType | "">("");
   const [toDelete, setToDelete] = useState<CustomerPopulated | null>(null);
 
-  // For now we re-use the paginated endpoint for everything. A dedicated stats
-  // endpoint would give us active count / aging buckets without scanning pages.
-  const { data, isLoading, isError } = usePaginatedCustomers(
+  const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS);
+  const searchPending = searchInput !== debouncedSearch;
+
+  const filter = useMemo(() => {
+    const f: Record<string, unknown> = {};
+    if (statusFilter) f.status = statusFilter;
+    if (typeFilter) f.type = typeFilter;
+    return Object.keys(f).length ? f : undefined;
+  }, [statusFilter, typeFilter]);
+
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+  } = usePaginatedCustomers(
     MAX_PER_PAGE,
     page,
-    search || undefined,
+    debouncedSearch || undefined,
+    undefined,
+    filter,
   );
+  const { data: shopStats, isLoading: statsLoading } = useCustomerStats();
   const { mutate: deleteCustomer } = useDeleteCustomer();
 
-  const filteredRows = useMemo(() => {
-    const docs = data?.docs ?? [];
-    return docs.filter((c) => {
-      if (statusFilter && c.status !== statusFilter) return false;
-      if (typeFilter && c.type !== typeFilter) return false;
-      return true;
-    });
-  }, [data?.docs, statusFilter, typeFilter]);
-
-  const totalCustomers = data?.pagination.totalRecords ?? 0;
-  // KPIs derived from the visible page — cheap and good enough for v1.
-  // A future stats endpoint should produce shop-wide values.
-  const visibleActive = filteredRows.filter(
-    (c) => c.status === CustomerStatus.ACTIVE,
-  ).length;
-  const visibleOutstanding = filteredRows.reduce(
-    (sum, c) => sum + (c.stats?.outstandingBalance ?? 0),
-    0,
-  );
+  const rows = data?.docs ?? [];
 
   if (isError) {
     return <div className="p-6 text-red-600">Failed to load customers</div>;
@@ -109,23 +111,27 @@ const AllCustomerPage = () => {
         </Button>
       </div>
 
-      {/* KPI strip */}
+      {/* KPI strip — shop-wide */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Total Customers" value={totalCustomers.toString()} />
         <KpiCard
-          label="Active (page)"
-          value={visibleActive.toString()}
-          hint="On this page"
+          label="Total Customers"
+          value={shopStats?.totalCustomers}
+          loading={statsLoading}
         />
         <KpiCard
-          label="Outstanding (page)"
-          value={money(visibleOutstanding)}
-          hint="On this page"
+          label="Active"
+          value={shopStats?.activeCustomers}
+          loading={statsLoading}
         />
         <KpiCard
-          label="With GSTIN (page)"
-          value={filteredRows.filter((c) => !!c.gstin).length.toString()}
-          hint="On this page"
+          label="Outstanding"
+          value={shopStats ? money(shopStats.totalOutstanding) : undefined}
+          loading={statsLoading}
+        />
+        <KpiCard
+          label="With GSTIN"
+          value={shopStats?.withGstin}
+          loading={statsLoading}
         />
       </div>
 
@@ -134,17 +140,25 @@ const AllCustomerPage = () => {
         <TextField
           size="small"
           placeholder="Search name / phone / GSTIN / code"
-          value={search}
+          value={searchInput}
           onChange={(e) => {
-            setSearch(e.target.value);
+            setSearchInput(e.target.value);
             setPage(1);
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <IoSearch className="text-gray-400" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IoSearch className="text-gray-400" />
+                </InputAdornment>
+              ),
+              endAdornment:
+                searchPending || (isFetching && !!debouncedSearch) ? (
+                  <InputAdornment position="end">
+                    <CircularProgress size={16} />
+                  </InputAdornment>
+                ) : null,
+            },
           }}
           className="min-w-[280px] flex-1"
           sx={{ minWidth: 280, flex: 1 }}
@@ -154,9 +168,10 @@ const AllCustomerPage = () => {
           size="small"
           label="Status"
           value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as CustomerStatus | "")
-          }
+          onChange={(e) => {
+            setStatusFilter(e.target.value as CustomerStatus | "");
+            setPage(1);
+          }}
           className="min-w-[140px]"
           sx={{ minWidth: 140 }}
         >
@@ -172,7 +187,10 @@ const AllCustomerPage = () => {
           size="small"
           label="Type"
           value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as CustomerType | "")}
+          onChange={(e) => {
+            setTypeFilter(e.target.value as CustomerType | "");
+            setPage(1);
+          }}
           className="min-w-[140px]"
           sx={{ minWidth: 140 }}
         >
@@ -186,12 +204,18 @@ const AllCustomerPage = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-3">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-3 relative">
+        {isFetching && !isLoading && (
+          <LinearProgress
+            className="absolute top-0 left-0 right-0 rounded-t-xl"
+            sx={{ height: 2 }}
+          />
+        )}
         {isLoading ? (
           <div className="flex justify-center py-16">
             <CircularProgress />
           </div>
-        ) : filteredRows.length === 0 ? (
+        ) : rows.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-500 dark:text-gray-400">
             No customers found.
           </div>
@@ -213,7 +237,7 @@ const AllCustomerPage = () => {
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
-                {filteredRows.map((c) => {
+                {rows.map((c) => {
                   const last = lastOrderBadge(daysAgo(c.stats?.lastOrderAt));
                   return (
                     <tr
@@ -367,17 +391,20 @@ const AllCustomerPage = () => {
 
 const KpiCard: React.FC<{
   label: string;
-  value: string;
-  hint?: string;
-}> = ({ label, value, hint }) => (
+  value?: string | number;
+  loading?: boolean;
+}> = ({ label, value, loading }) => (
   <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
     <div className="text-xs uppercase text-gray-500 dark:text-gray-400">
       {label}
     </div>
-    <div className="text-2xl font-semibold text-gray-900 dark:text-gray-50 mt-1">
-      {value}
-    </div>
-    {hint && <div className="text-xs text-gray-400 mt-1">{hint}</div>}
+    {loading ? (
+      <div className="h-7 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2" />
+    ) : (
+      <div className="text-2xl font-semibold text-gray-900 dark:text-gray-50 mt-1">
+        {value ?? "—"}
+      </div>
+    )}
   </div>
 );
 

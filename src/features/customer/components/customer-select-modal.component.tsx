@@ -50,7 +50,7 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
     <Modal
       title="Select or Add Customer"
       onClose={close}
-      className="w-[95vw] max-w-[600px]"
+      className="w-[95vw] max-w-[720px]"
     >
       <div className="space-y-4">
         {/* Tabs */}
@@ -77,18 +77,21 @@ export const CustomerSelectModal: React.FC<CustomerSelectModalProps> = ({
           </button>
         </div>
 
-        {/* Search Tab */}
+        {/* Search Tab — list owns its own scroll */}
         {activeTab === "search" && (
           <SearchableListCustomer onCustomerSelect={handleCustomerSelect} />
         )}
 
-        {/* Add New Tab */}
+        {/* Add New Tab — wrap the form in its own scroller */}
         {activeTab === "add" && (
-          <CustomerForm
-            onSubmit={handleAddCustomer}
-            isLoading={putCustomerMutation.isPending}
-            initialCustomerData={INITIAL_FORM_VALUES}
-          />
+          <div className="max-h-[70vh] overflow-y-auto pr-1">
+            <CustomerForm
+              onSubmit={handleAddCustomer}
+              isLoading={putCustomerMutation.isPending}
+              initialCustomerData={INITIAL_FORM_VALUES}
+              compact
+            />
+          </div>
         )}
       </div>
     </Modal>

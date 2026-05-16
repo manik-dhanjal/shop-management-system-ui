@@ -7,6 +7,7 @@ export const usePaginatedCustomers = (
   page: number,
   search?: string,
   sort?: Record<string, string>,
+  filter?: Record<string, unknown>,
 ) => {
   const { activeShop } = useShop();
   return useQuery({
@@ -18,6 +19,7 @@ export const usePaginatedCustomers = (
       page,
       search,
       sort,
+      filter,
     ],
     queryFn: async () => {
       return CustomerApi.getPaginatedCustomers(
@@ -26,6 +28,7 @@ export const usePaginatedCustomers = (
         page,
         search,
         sort,
+        filter,
       );
     },
   });
