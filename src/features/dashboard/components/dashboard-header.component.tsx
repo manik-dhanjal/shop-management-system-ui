@@ -4,7 +4,7 @@ import SearchModal from "@shared/components/ModalSearch";
 import Notifications from "@shared/components/DropdownNotifications";
 import UserMenu from "@features/dashboard/components/dropdown-profile.component";
 import ThemeToggle from "@shared/components/theme-toggle.component";
-import ShopSelectDropdown from "./shop-select-dropdown.component";
+import ShopSwitcher from "@features/shop/components/shop-switcher.component";
 
 export interface DashboardHeaderTypes {
   sidebarOpen: boolean;
@@ -97,7 +97,7 @@ function Header({
             {/*  Divider */}
 
             <hr className="w-px h-6 bg-gray-200 dark:bg-gray-700/60 border-none" />
-            <ShopSelectDropdown align="right" />
+            <ShopSwitcher align="right" />
             <hr className="w-px h-6 bg-gray-200 dark:bg-gray-700/60 border-none" />
             <UserMenu align="right" />
           </div>

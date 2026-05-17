@@ -1,23 +1,33 @@
-import ShopForm from "@features/shop/components/shop-form.component";
+import { useNavigate } from "react-router-dom";
 import { useAddShop } from "@features/shop/hooks/use-add-shop.hook";
-import { ShopFormType } from "@features/shop/interface/shop-form.interface";
-import { useGlobalLoading } from "@shared/context/global-loading.context";
-import { useEffect } from "react";
+import {
+  ShopEditForm,
+  ShopEditFormValues,
+} from "@features/shop/components/shop-edit-form.component";
 
 const AddShopPage = () => {
-  const { mutate, isPending } = useAddShop();
-  const { showLoading, hideLoading } = useGlobalLoading();
-  const handleSave = (shop: ShopFormType) => {
-    mutate(shop);
+  const navigate = useNavigate();
+  const { mutateAsync, isPending } = useAddShop();
+
+  const handleSubmit = async (values: ShopEditFormValues) => {
+    const created = await mutateAsync(values);
+    navigate(`/dashboard/shop/${created._id}`);
   };
-  useEffect(() => {
-    if (isPending) {
-      showLoading();
-    } else {
-      hideLoading();
-    }
-  }, [isPending]);
-  return <ShopForm formTitle="Add new shop" onSubmit={handleSave} />;
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+        Add Shop
+      </h1>
+      <ShopEditForm
+        initial={{}}
+        onSubmit={handleSubmit}
+        isLoading={isPending}
+        submitLabel="Create Shop"
+      />
+    </div>
+  );
 };
 
 export default AddShopPage;
+export { AddShopPage };

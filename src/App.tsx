@@ -31,6 +31,9 @@ import { AllSupplierPage } from "@pages/dashboard/supplier/all-supplier.page";
 import { AddSupplierPage } from "@pages/dashboard/supplier/add-supplier.page";
 import { SupplierDetailPage } from "@pages/dashboard/supplier/supplier-detail.page";
 import { EditSupplierPage } from "@pages/dashboard/supplier/edit-supplier.page";
+import { AllShopsPage } from "@pages/dashboard/shop/all-shops.page";
+import { ShopDetailPage } from "@pages/dashboard/shop/shop-detail.page";
+import { EditShopPage } from "@pages/dashboard/shop/edit-shop.page";
 
 function App() {
   const location = useLocation();
@@ -62,7 +65,10 @@ function App() {
             <Route path=":productId/edit" element={<EditProductPage />} />
           </Route>
           <Route path="shop">
+            <Route path="all" element={<AllShopsPage />} />
             <Route path="add" element={<AddShopPage />} />
+            <Route path=":shopId" element={<ShopDetailPage />} />
+            <Route path=":shopId/edit" element={<EditShopPage />} />
           </Route>
           <Route path="employee">
             <Route path="add" element={<AddEmployeePage />} />
