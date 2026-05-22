@@ -56,7 +56,7 @@ export class OrderApi {
     orderId: string,
     order: UpdateOrder,
   ): Promise<Order> {
-    const response = await apiClient.patch(
+    const response = await apiClient.put(
       `/api/v1/shop/${shopId}/order/${orderId}`,
       order,
     );

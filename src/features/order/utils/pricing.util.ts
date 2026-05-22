@@ -59,6 +59,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
  * Pure: no side effects, deterministic for the same inputs.
  */
 export function computeOrderTotals(input: PricingInputs): ComputedOrder {
+  console.log("Computing order totals with input:", input);
   const {
     items,
     orderDiscount = 0,
@@ -81,10 +82,13 @@ export function computeOrderTotals(input: PricingInputs): ComputedOrder {
   const grossPerLine = items.map((it) =>
     round2((it.product.sellPrice || 0) * (it.quantity || 0)),
   );
+  console.log("Gross per line:", grossPerLine);
   const itemDiscountPerLine = items.map((it) => round2(it.discount || 0));
+  console.log("Item discount per line:", itemDiscountPerLine);
   const grossTotal = grossPerLine.reduce((a, b) => a + b, 0);
+  console.log("Gross total:", grossTotal);
   const itemDiscountTotal = itemDiscountPerLine.reduce((a, b) => a + b, 0);
-
+  console.log("Item discount total:", itemDiscountTotal);
   // Allocate order-level discount proportionally across lines based on their
   // post-item-discount value, so each line's GST is reduced fairly.
   const allocBase = grossPerLine.map((g, i) => g - itemDiscountPerLine[i]);

@@ -8,6 +8,26 @@ import {
 import { UserRole } from "@shared/enums/user-role.enum";
 import { apiClient } from "./client.api";
 
+const SHOP_WRITABLE_KEYS: (keyof Shop)[] = [
+  "name", "kind", "status", "description", "logo", "currency", "timezone",
+  "billingEmail", "location", "gstDetails", "phone", "email",
+  "alternatePhones", "alternateEmails", "contactPersonName",
+  "contactPersonDesignation", "contactPersons",
+];
+
+function sanitizeShopPayload(payload: Partial<Shop>): Partial<Shop> {
+  const result: Partial<Shop> = {};
+  for (const key of SHOP_WRITABLE_KEYS) {
+    if (key in payload) {
+      const val = payload[key];
+      // Drop empty-string optional email fields — backend validates format
+      if ((key === "email" || key === "billingEmail") && val === "") continue;
+      (result as any)[key] = val;
+    }
+  }
+  return result;
+}
+
 export class ShopApi {
   // ---- my shops ----
   static async getMyShops(q?: string): Promise<MyShopRow[]> {
@@ -29,7 +49,7 @@ export class ShopApi {
   }
 
   static async addShop(shop: Partial<Shop>): Promise<Shop> {
-    const response = await apiClient.post("/api/v1/shop", shop);
+    const response = await apiClient.post("/api/v1/shop", sanitizeShopPayload(shop));
     return response.data;
   }
 
@@ -39,7 +59,7 @@ export class ShopApi {
   ): Promise<Shop> {
     const response = await apiClient.patch(
       `/api/v1/shop/${shopId}`,
-      payload,
+      sanitizeShopPayload(payload),
     );
     return response.data;
   }

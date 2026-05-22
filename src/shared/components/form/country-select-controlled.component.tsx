@@ -10,20 +10,25 @@ import {
 } from "react-hook-form";
 import { makeStyles } from "@mui/styles";
 
+export type CountryOption = { code: string; label: string };
+
 type CountrySelectControlledProps = {
   control: Control<any>;
   name: string;
   label: string;
   defaultCountry?: string;
   className?: string;
+  required?: boolean;
+  onCountryChange?: (country: CountryOption | null) => void;
 };
 
 type CountrySelectProps = {
   field: ControllerRenderProps<FieldValues, string>;
   label: string;
   className?: string;
-  defaultCountry?: string;
   fieldState: ControllerFieldState;
+  required?: boolean;
+  onCountryChange?: (country: CountryOption | null) => void;
 };
 
 const useStyles = makeStyles({
@@ -51,6 +56,8 @@ export const CountrySelectControlled = ({
   label,
   defaultCountry,
   className,
+  required,
+  onCountryChange,
 }: CountrySelectControlledProps) => (
   <Controller
     name={name}
@@ -60,9 +67,10 @@ export const CountrySelectControlled = ({
       <CountrySelect
         field={field}
         label={label}
-        defaultCountry={defaultCountry}
         className={className}
         fieldState={fieldState}
+        required={required}
+        onCountryChange={onCountryChange}
       />
     )}
   />
@@ -71,9 +79,10 @@ export const CountrySelectControlled = ({
 export default function CountrySelect({
   field,
   label,
-  defaultCountry,
   className,
   fieldState,
+  required,
+  onCountryChange,
 }: CountrySelectProps) {
   const classes = useStyles();
 
@@ -81,20 +90,24 @@ export default function CountrySelect({
     <Autocomplete
       sx={{
         "& .MuiOutlinedInput-root": {
-          borderRadius: "8px", // Change borderRadius here
+          borderRadius: "8px",
         },
         "& .MuiAutocomplete-popupIndicator": {
-          borderRadius: "8px", // Change borderRadius of popup indicator
+          borderRadius: "8px",
         },
       }}
       className={className}
       options={countries}
       getOptionLabel={(option: CountryType) => option.label}
+      isOptionEqualToValue={(option, value) => option.code === value.code}
       classes={{
         option: classes.option,
       }}
-      defaultValue={getCountryByLabel(defaultCountry)}
-      onChange={(_, data) => field.onChange(data?.label)}
+      value={getCountryByLabel(field.value) ?? null}
+      onChange={(_, data) => {
+        field.onChange(data?.label ?? "");
+        onCountryChange?.(data ? { code: data.code, label: data.label } : null);
+      }}
       renderOption={(props, option) => {
         const { key, ...optionProps } = props;
         return (
@@ -119,7 +132,7 @@ export default function CountrySelect({
         <TextField
           {...params}
           {...field}
-          label={label}
+          label={label + (required ? " *" : "")}
           inputRef={field.ref}
           error={fieldState.invalid}
           helperText={fieldState.error?.message}

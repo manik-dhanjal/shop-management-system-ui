@@ -11,6 +11,8 @@ export const TextFieldControlled = ({
   control,
   className,
   slotProps,
+  required,
+  label,
   ...props
 }: TextFieldControlledProps) => {
   // apply any tailwind/utility classes to a wrapper div instead of the
@@ -41,6 +43,7 @@ export const TextFieldControlled = ({
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
               className="w-full"
+              label={label + (required ? " *" : "")}
               slotProps={{
                 ...slotProps,
                 input: {
