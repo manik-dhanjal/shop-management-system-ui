@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useForm,
   SubmitHandler,
@@ -6,7 +6,17 @@ import {
   useWatch,
 } from "react-hook-form";
 import * as yup from "yup";
-import { Button, Chip, Collapse, IconButton, TextField } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Chip,
+  CircularProgress,
+  Collapse,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   IoAdd,
   IoChevronDown,
@@ -19,18 +29,24 @@ import SelectFieldControlled from "@shared/components/form/select-field-controll
 import { PhoneFieldControlled } from "@shared/components/form/phone-field-controlled.component";
 import { LocationFormSection } from "@shared/components/form/location-form-section.component";
 import { FormContainer } from "@shared/components/form-container.component";
-import { Shop } from "@features/shop/interface/shop.interface";
+import { Shop, ShopGstDetails } from "@features/shop/interface/shop.interface";
 import { ShopKind } from "@shared/enums/shop-kind.enum";
 import { ShopStatus } from "@shared/enums/shop-status.enum";
 import { useStatesByCountry } from "@features/location/hooks/use-states-by-country.hook";
+import { useRequestGstOtp } from "@features/shop/hooks/use-request-gst-otp.hook";
+import { useVerifyGstOtp } from "@features/shop/hooks/use-verify-gst-otp.hook";
+import { GstVerifyPanel } from "./gst-verify-panel.component";
 
 export type ShopEditFormValues = Partial<Shop>;
+
+type GstVerifyStep = "idle" | "otp_sent" | "verifying" | "done" | "error";
 
 interface Props {
   initial: ShopEditFormValues;
   onSubmit: SubmitHandler<ShopEditFormValues>;
   isLoading?: boolean;
   submitLabel?: string;
+  shopId?: string;
 }
 
 const GSTIN_PATTERN =
@@ -70,7 +86,7 @@ const gstDetailsSchema = yup
       .length(15, "GSTIN must be exactly 15 characters")
       .matches(GSTIN_PATTERN, "Invalid GSTIN format")
       .required("GSTIN is required"),
-    legalName: yup.string().trim().required("Legal name is required"),
+    legalName: yup.string().trim().optional(),
     tradeName: yup.string().trim().optional(),
     address: yup.string().trim().optional(),
     state: yup.string().trim().optional(),
@@ -93,8 +109,12 @@ const gstDetailsSchema = yup
     panCardNumber: yup
       .string()
       .trim()
-      .length(10, "PAN must be 10 characters")
-      .required("PAN is required"),
+      .test(
+        "pan-length",
+        "PAN must be 10 characters",
+        (v) => !v || v.length === 10,
+      )
+      .optional(),
   })
   .transform((value, originalValue) => {
     if (!originalValue) return undefined;
@@ -158,6 +178,7 @@ export const ShopEditForm: React.FC<Props> = ({
   onSubmit,
   isLoading,
   submitLabel = "Save Changes",
+  shopId,
 }) => {
   const resolver = useYupValidationResolver(schema);
 
@@ -189,28 +210,98 @@ export const ShopEditForm: React.FC<Props> = ({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
   } = useForm<ShopEditFormValues>({
     defaultValues: defaults,
     resolver,
   });
-  console.log("Form errors:", errors);
+
   useEffect(() => {
     reset(defaults);
   }, [defaults, reset]);
+
+  // ── GST OTP verification state ───────────────────────────────────────────
+  const [gstVerifyStep, setGstVerifyStep] = useState<GstVerifyStep>(
+    () => (initial.gstDetails?.verifiedAt ? "done" : "idle"),
+  );
+  const [otpValue, setOtpValue] = useState("");
+  const [otpEmail, setOtpEmail] = useState(initial.gstDetails?.email ?? "");
+  const [gstVerifyError, setGstVerifyError] = useState<string | null>(null);
+  // Holds the taxpayer data returned by the verify mutation so the panel can
+  // show "Verified from GST Portal" immediately — before the shop refetch completes.
+  const [verifiedGstDetails, setVerifiedGstDetails] = useState<ShopGstDetails | null>(
+    initial.gstDetails?.verifiedAt ? initial.gstDetails : null,
+  );
+
+  const requestOtpMutation = useRequestGstOtp(shopId ?? "");
+  const verifyOtpMutation = useVerifyGstOtp(shopId ?? "");
+
+  const initialGstin = useRef(initial.gstDetails?.gstin ?? "");
+
+  const handleSendOtp = async () => {
+    setGstVerifyError(null);
+    try {
+      await requestOtpMutation.mutateAsync({ gstin: gstin ?? "" });
+      setGstVerifyStep("otp_sent");
+    } catch (err: any) {
+      setGstVerifyError(
+        err?.response?.data?.message ?? "Failed to send OTP. Try again.",
+      );
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setGstVerifyError(null);
+    setGstVerifyStep("verifying");
+    try {
+      const result = await verifyOtpMutation.mutateAsync({
+        gstin: gstin ?? "",
+        otp: otpValue,
+        email: otpEmail || undefined,
+      });
+      // Store the verified taxpayer data immediately so the panel shows "Verified from
+      // GST Portal" before the shop refetch completes (the hook's onSuccess invalidates
+      // the cache but the fetch is async — result is available right now).
+      if (result) setVerifiedGstDetails(result as ShopGstDetails);
+      setGstVerifyStep("done");
+      setOtpValue("");
+    } catch (err: any) {
+      setGstVerifyError(
+        err?.response?.data?.message ?? "Verification failed. Try again.",
+      );
+      setGstVerifyStep("error");
+    }
+  };
 
   const { data: indianStates } = useStatesByCountry("IN");
 
   // Auto-populate PAN and state from GSTIN when a valid 15-char GSTIN is entered.
   const gstin = useWatch({ control, name: "gstDetails.gstin" }) as string;
+
+  // Reset verify step when user changes the GSTIN away from the verified value.
+  useEffect(() => {
+    if (gstVerifyStep === "done" && gstin !== initialGstin.current) {
+      setGstVerifyStep("idle");
+      setVerifiedGstDetails(null);
+    }
+  }, [gstin, gstVerifyStep]);
+
+  // Sync verifiedGstDetails from a refetch if the shop was already verified in DB.
+  useEffect(() => {
+    if (initial.gstDetails?.verifiedAt && !verifiedGstDetails) {
+      setVerifiedGstDetails(initial.gstDetails);
+    }
+  }, [initial.gstDetails?.verifiedAt]);
+
   useEffect(() => {
     if (gstin && gstin.length === 15 && GSTIN_PATTERN.test(gstin)) {
-      setValue("gstDetails.panCardNumber", gstin.slice(2, 12));
-      const stateCode = gstin.slice(0, 2);
-      const stateEntry = indianStates?.find((s) => s.code === stateCode);
-      if (stateEntry) setValue("gstDetails.state", stateEntry.name);
+      if (gstVerifyStep !== "done") {
+        setValue("gstDetails.panCardNumber", gstin.slice(2, 12));
+        const stateCode = gstin.slice(0, 2);
+        const stateEntry = indianStates?.find((s) => s.code === stateCode);
+        if (stateEntry) setValue("gstDetails.state", stateEntry.name);
+      }
     }
-  }, [gstin, indianStates, setValue]);
+  }, [gstin, indianStates, setValue, gstVerifyStep]);
 
   const altPhones = useFieldArray({
     control,
@@ -284,34 +375,201 @@ export const ShopEditForm: React.FC<Props> = ({
             </div>
           </FormContainer>
           <FormContainer title="GST & Tax">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <TextFieldControlled
-                label="GSTIN"
-                name="gstDetails.gstin"
-                control={control}
-                placeholder="27AAACX1234B1Z1"
-                required
-              />
-              <TextFieldControlled
-                label="Legal Name"
-                name="gstDetails.legalName"
-                control={control}
-                required
-              />
-              <TextFieldControlled
-                label="PAN"
-                name="gstDetails.panCardNumber"
-                control={control}
-                placeholder="Auto-filled from GSTIN"
-                required
-              />
-              <TextFieldControlled
-                label="State"
-                name="gstDetails.state"
-                control={control}
-                placeholder="Auto-filled from GSTIN"
-                required
-              />
+            <div className="flex flex-col gap-4">
+              {/* GSTIN row */}
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <TextFieldControlled
+                    label="GSTIN"
+                    name="gstDetails.gstin"
+                    control={control}
+                    placeholder="27AAACX1234B1Z1"
+                  />
+                </div>
+                {gstVerifyStep === "done" && (
+                  <Chip
+                    icon={<CheckCircleIcon />}
+                    label="Verified"
+                    color="success"
+                    size="small"
+                    sx={{ mb: 0.5 }}
+                  />
+                )}
+              </div>
+
+              {/* Send OTP button — shown when idle and GSTIN is valid */}
+              {gstVerifyStep === "idle" && (
+                <div className="flex items-center gap-2">
+                  {shopId ? (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleSendOtp}
+                      disabled={
+                        !gstin ||
+                        gstin.length !== 15 ||
+                        !GSTIN_PATTERN.test(gstin) ||
+                        requestOtpMutation.isPending
+                      }
+                      startIcon={
+                        requestOtpMutation.isPending ? (
+                          <CircularProgress size={12} />
+                        ) : undefined
+                      }
+                    >
+                      {requestOtpMutation.isPending
+                        ? "Sending OTP…"
+                        : "Send OTP to verify ↗"}
+                    </Button>
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      Save the shop first, then verify your GSTIN from the Edit
+                      page.
+                    </Typography>
+                  )}
+                  {gstVerifyError && (
+                    <Typography variant="caption" color="error">
+                      {gstVerifyError}
+                    </Typography>
+                  )}
+                </div>
+              )}
+
+              {/* OTP input — shown after OTP is sent */}
+              {(gstVerifyStep === "otp_sent" ||
+                gstVerifyStep === "verifying" ||
+                gstVerifyStep === "error") && (
+                <div className="flex flex-col gap-3">
+                  <Alert severity="info" sx={{ py: 0.5 }}>
+                    OTP sent to your GST-registered mobile / email. Enter the
+                    6-digit OTP below.
+                  </Alert>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <TextField
+                      size="small"
+                      label="OTP"
+                      value={otpValue}
+                      onChange={(e) => setOtpValue(e.target.value)}
+                      inputProps={{ maxLength: 6 }}
+                      sx={{ width: 140 }}
+                    />
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleVerifyOtp}
+                      disabled={
+                        otpValue.length < 4 || gstVerifyStep === "verifying"
+                      }
+                      startIcon={
+                        gstVerifyStep === "verifying" ? (
+                          <CircularProgress size={12} />
+                        ) : undefined
+                      }
+                    >
+                      {gstVerifyStep === "verifying" ? "Verifying…" : "Verify"}
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={handleSendOtp}
+                      disabled={requestOtpMutation.isPending}
+                    >
+                      Resend OTP
+                    </Button>
+                  </div>
+                  <TextField
+                    size="small"
+                    label="GST-registered email (optional)"
+                    value={otpEmail}
+                    onChange={(e) => setOtpEmail(e.target.value)}
+                    type="email"
+                    fullWidth
+                    helperText="Needed for taxpayer data lookup"
+                  />
+                  {gstVerifyError && (
+                    <Alert severity="error" sx={{ py: 0.5 }}>
+                      {gstVerifyError}
+                    </Alert>
+                  )}
+                </div>
+              )}
+
+              {/* Re-verify button and locked panel — shown when verified */}
+              {gstVerifyStep === "done" && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <Typography variant="caption" color="text.secondary">
+                      ✓ Last verified:{" "}
+                      {initial.gstDetails?.verifiedAt
+                        ? new Date(
+                            initial.gstDetails.verifiedAt,
+                          ).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "just now"}
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        setGstVerifyStep("idle");
+                        setOtpValue("");
+                        setGstVerifyError(null);
+                        setVerifiedGstDetails(null);
+                      }}
+                    >
+                      Re-verify
+                    </Button>
+                  </div>
+                  <GstVerifyPanel
+                    gstDetails={
+                      verifiedGstDetails ??
+                      initial.gstDetails ??
+                      { gstin: gstin ?? "" }
+                    }
+                  />
+                </>
+              )}
+
+              {/* Manual fields — shown when not verified */}
+              {gstVerifyStep !== "done" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <TextFieldControlled
+                    label="Legal Name"
+                    name="gstDetails.legalName"
+                    control={control}
+                  />
+                  <TextFieldControlled
+                    label="PAN"
+                    name="gstDetails.panCardNumber"
+                    control={control}
+                    placeholder="Auto-filled from GSTIN"
+                  />
+                  <TextFieldControlled
+                    label="State"
+                    name="gstDetails.state"
+                    control={control}
+                    placeholder="Auto-filled from GSTIN"
+                  />
+                </div>
+              )}
+
+              {/* Portal credentials — shown when verified */}
+              {gstVerifyStep === "done" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <TextFieldControlled
+                    label="GST Portal Username (optional)"
+                    name="gstDetails.username"
+                    control={control}
+                  />
+                  <TextFieldControlled
+                    label="GST Portal Email (optional)"
+                    name="gstDetails.email"
+                    control={control}
+                    type="email"
+                  />
+                </div>
+              )}
             </div>
           </FormContainer>
           <FormContainer title="Address">

@@ -48,6 +48,7 @@ const EditShopPage = () => {
         initial={shop as ShopEditFormValues}
         onSubmit={handleSubmit}
         isLoading={isPending}
+        shopId={shopId}
       />
     </div>
   );
