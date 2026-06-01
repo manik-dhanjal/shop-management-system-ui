@@ -17,9 +17,7 @@ const SHOP_WRITABLE_KEYS: (keyof Shop)[] = [
 ];
 
 const GST_DETAILS_WRITABLE_KEYS: (keyof ShopGstDetails)[] = [
-  "gstin", "legalName", "tradeName", "panCardNumber", "address", "state",
-  "registrationDate", "status", "constitutionOfBusiness", "einvoiceApplicable",
-  "natureOfBusiness", "username", "email",
+  "gstin", "legalName", "panCardNumber", "state",
 ];
 
 function sanitizeGstDetails(gst: ShopGstDetails): Partial<ShopGstDetails> {
@@ -120,25 +118,5 @@ export class ShopApi {
     userId: string,
   ): Promise<void> {
     await apiClient.delete(`/api/v1/shop/${shopId}/members/${userId}`);
-  }
-
-  // ---- GST verification ----
-
-  static async requestGstOtp(shopId: string, gstin: string): Promise<void> {
-    await apiClient.post(`/api/v1/shop/${shopId}/gst/request-otp`, { gstin });
-  }
-
-  static async verifyGstOtp(
-    shopId: string,
-    gstin: string,
-    otp: string,
-    email?: string,
-  ): Promise<ShopGstDetails> {
-    const r = await apiClient.post(`/api/v1/shop/${shopId}/gst/verify`, {
-      gstin,
-      otp,
-      email,
-    });
-    return r.data;
   }
 }

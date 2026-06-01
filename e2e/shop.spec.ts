@@ -79,19 +79,6 @@ test.describe("Add Shop form", () => {
     const panField = page.getByLabel(/pan/i);
     await expect(panField).toHaveValue("AABCU9603R", { timeout: 3_000 });
   });
-
-  test("shows 'Save first to verify' hint when no shopId", async ({
-    page,
-  }) => {
-    // On Add Shop there's no shopId, so the OTP verify button is replaced
-    // by a hint telling the user to save first
-    const gstinField = page.getByLabel(/gstin/i);
-    await gstinField.fill("27AABCU9603R1ZX");
-
-    await expect(
-      page.getByText(/save the shop first/i),
-    ).toBeVisible({ timeout: 3_000 });
-  });
 });
 
 test.describe("Edit Shop — GST & Tax section", () => {
@@ -110,105 +97,18 @@ test.describe("Edit Shop — GST & Tax section", () => {
     await expect(page.getByLabel(/gstin/i)).toBeVisible();
   });
 
-  test("shows 'Send OTP to verify' button for a valid GSTIN", async ({
-    page,
-  }) => {
-    const gstinField = page.getByLabel(/gstin/i);
-    await gstinField.fill("27AABCU9603R1ZX");
-
-    const sendOtpBtn = page.getByRole("button", { name: /send otp/i });
-    await expect(sendOtpBtn).toBeVisible({ timeout: 3_000 });
-    await expect(sendOtpBtn).toBeEnabled();
+  test("renders manual GST fields (Legal Name, PAN, State)", async ({ page }) => {
+    // GST is manual-entry only — no OTP verification UI
+    await expect(page.getByLabel(/legal name/i)).toBeVisible();
+    await expect(page.getByLabel(/pan/i)).toBeVisible();
+    await expect(page.getByLabel(/state/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /send otp/i })).toHaveCount(0);
   });
 
-  test("disables 'Send OTP' when GSTIN is invalid", async ({ page }) => {
-    const gstinField = page.getByLabel(/gstin/i);
-    await gstinField.fill("INVALID");
-
-    const sendOtpBtn = page.getByRole("button", { name: /send otp/i });
-    // Button should either not exist or be disabled
-    const count = await sendOtpBtn.count();
-    if (count > 0) {
-      await expect(sendOtpBtn).toBeDisabled();
-    }
-    // Not finding the button is also acceptable
-  });
-
-  test("shows OTP input after clicking Send OTP", async ({ page }) => {
-    const gstinField = page.getByLabel(/gstin/i);
-    await gstinField.fill("27AABCU9603R1ZX");
-
-    // Intercept the request-otp API call so the test doesn't hit the real portal
-    await page.route("**/gst/request-otp", async (route) => {
-      await route.fulfill({ status: 204, body: "" });
-    });
-
-    await page.getByRole("button", { name: /send otp/i }).click();
-
-    await expect(page.getByLabel(/otp/i)).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByRole("button", { name: /^verify$/i })).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /resend otp/i }),
-    ).toBeVisible();
-  });
-
-  test("shows error alert when verify OTP fails", async ({ page }) => {
-    const gstinField = page.getByLabel(/gstin/i);
-    await gstinField.fill("27AABCU9603R1ZX");
-
-    await page.route("**/gst/request-otp", (r) =>
-      r.fulfill({ status: 204, body: "" }),
-    );
-    await page.route("**/gst/verify", (r) =>
-      r.fulfill({
-        status: 400,
-        contentType: "application/json",
-        body: JSON.stringify({ message: "Invalid OTP. Please check and try again." }),
-      }),
-    );
-
-    await page.getByRole("button", { name: /send otp/i }).click();
-    await page.getByLabel(/otp/i).fill("999999");
-    await page.getByRole("button", { name: /^verify$/i }).click();
-
-    await expect(
-      page.getByText(/invalid otp/i),
-    ).toBeVisible({ timeout: 5_000 });
-  });
-
-  test("shows verified panel after successful OTP verify", async ({ page }) => {
-    const gstinField = page.getByLabel(/gstin/i);
-    await gstinField.fill("27AABCU9603R1ZX");
-
-    await page.route("**/gst/request-otp", (r) =>
-      r.fulfill({ status: 204, body: "" }),
-    );
-    await page.route("**/gst/verify", (r) =>
-      r.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          gstin: "27AABCU9603R1ZX",
-          legalName: "Test Company Pvt Ltd",
-          tradeName: "Test Trade",
-          panCardNumber: "AABCU9603R",
-          status: "Active",
-          constitutionOfBusiness: "Private Limited Company",
-          state: "Maharashtra",
-          verifiedAt: new Date().toISOString(),
-        }),
-      }),
-    );
-
-    await page.getByRole("button", { name: /send otp/i }).click();
-    await page.getByLabel(/otp/i).fill("575757");
-    await page.getByRole("button", { name: /^verify$/i }).click();
-
-    // The source fix (verifiedGstDetails state) means the panel now shows immediately
-    // from the mutation result — no need to stub the shop GET refetch.
-    await expect(
-      page.getByText(/verified from gst portal/i).first(),
-    ).toBeVisible({ timeout: 8_000 });
+  test("auto-fills PAN + State from a valid GSTIN", async ({ page }) => {
+    await page.getByLabel(/gstin/i).fill("27AABCU9603R1ZX");
+    // PAN = chars 3–12; state code 27 → Maharashtra
+    await expect(page.getByLabel(/pan/i)).toHaveValue("AABCU9603R", { timeout: 3_000 });
   });
 
   test("can save shop without GST details", async ({ page }) => {

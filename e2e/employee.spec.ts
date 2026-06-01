@@ -21,9 +21,14 @@ test.describe("All Employees", () => {
   });
 
   test("@smoke employee list renders table rows or empty state", async ({ page }) => {
-    // The all-employees page has a table; Add Employee is accessed via sidebar/nav
+    // Wait for the page shell, then for the loading spinner to clear before
+    // asserting content (the list can be slow when many users exist).
+    await expect(page.getByRole("heading", { name: /employees/i }).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(".MuiCircularProgress-root").first())
+      .toBeHidden({ timeout: 15_000 })
+      .catch(() => {});
     const content = page.locator("table, [class*='empty'], [class*='not found']").first();
-    await expect(content).toBeVisible({ timeout: 8_000 });
+    await expect(content).toBeVisible({ timeout: 12_000 });
   });
 });
 

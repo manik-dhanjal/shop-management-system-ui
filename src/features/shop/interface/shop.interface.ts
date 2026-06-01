@@ -5,37 +5,11 @@ import { ShopStatus } from "@shared/enums/shop-status.enum";
 import { UserRole } from "@shared/enums/user-role.enum";
 import { ContactPerson } from "@features/customer/interface/customer.interface";
 
-export enum ConstitutionOfBusiness {
-  PROPRIETORSHIP = "Proprietorship",
-  PARTNERSHIP = "Partnership",
-  HINDU_UNDIVIDED_FAMILY = "Hindu Undivided Family",
-  PRIVATE_LIMITED_COMPANY = "Private Limited Company",
-  PUBLIC_LIMITED_COMPANY = "Public Limited Company",
-  LLP = "Limited Liability Partnership",
-  TRUST = "Trust",
-  ASSOCIATION_OR_BOI = "Association of Persons or Body of Individuals",
-  LOCAL_AUTHORITY = "Local Authority",
-  STATUTORY_BODY = "Statutory Body",
-  GOVERNMENT_DEPARTMENT = "Government Department",
-  SOCIETY_OR_CLUB = "Society or Club",
-  OTHERS = "Others",
-}
-
 export interface ShopGstDetails {
   gstin?: string;
   legalName?: string;
-  tradeName?: string;
   panCardNumber?: string;
-  address?: string;
   state?: string;
-  registrationDate?: string;
-  status?: string;
-  constitutionOfBusiness?: ConstitutionOfBusiness;
-  einvoiceApplicable?: boolean;
-  natureOfBusiness?: string[];
-  verifiedAt?: string;
-  username?: string;
-  email?: string;
 }
 
 export interface Shop {
