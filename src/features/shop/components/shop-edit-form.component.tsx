@@ -274,27 +274,55 @@ export const ShopEditForm: React.FC<Props> = ({
                 control={control}
                 placeholder="27AAACX1234B1Z1"
               />
-
+              <TextFieldControlled
+                label="Shop's Legal Name"
+                name="gstDetails.legalName"
+                control={control}
+              />
+              <TextFieldControlled
+                label="GST Username"
+                name="gstDetails.gstUsername"
+                control={control}
+              />
               {/* Manual GST fields (PAN + State auto-fill from a valid GSTIN) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextFieldControlled
-                  label="Legal Name"
-                  name="gstDetails.legalName"
+                  label="GST Email"
+                  name="gstDetails.gstEmail"
                   control={control}
+                  type="email"
+                />
+                <PhoneFieldControlled
+                  label="GST Phone Number"
+                  name="gstDetails.gstPhone"
+                  control={control}
+                  defaultCountry="IN"
+                  className="w-full"
+                  type="tel"
                 />
                 <TextFieldControlled
                   label="PAN"
                   name="gstDetails.panCardNumber"
                   control={control}
                   placeholder="Auto-filled from GSTIN"
+                  disabled={!!gstin}
                 />
                 <TextFieldControlled
-                  label="State"
+                  label="State Code"
                   name="gstDetails.state"
                   control={control}
                   placeholder="Auto-filled from GSTIN"
+                  disabled={!!gstin}
                 />
               </div>
+              <Button
+                size="small"
+                type="button"
+                className="self-end"
+                variant="contained"
+              >
+                Verify GSTIN
+              </Button>
             </div>
           </FormContainer>
           <FormContainer title="Address">
